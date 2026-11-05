@@ -1,9 +1,9 @@
-﻿import { useContext, useState } from 'react'
+﻿import { useContext, useEffect, useState } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-query'
 import { api, mediaUrl } from './api'
 import { Empty, ErrorMessage, Money, State, VideoPlayer } from './shared'
-import { Language, LanguageSettings, text, useApi } from './data'
+import { Language, LanguageSettings, SubtitleSettings, text, useApi } from './data'
 import { Merchant } from './Merchant'
 import MarketMap from './MarketMap'
 import Dialog from './Dialog'
@@ -11,6 +11,8 @@ import Shorts from './Shorts'
 import Profile, { LanguageSelect, NavIcon } from './Profile'
 import PagePosition from './PagePosition'
 import { copy } from './locale'
+import Contents from './Contents'
+import { rememberShop } from './local-history'
 
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30000 } } })
 function StoreCard({ store, index = 0 }) {
@@ -36,16 +38,12 @@ function VideoPage() {
 function Store() {
   const u = copy[useContext(Language)]
   const { id } = useParams(), lang = useContext(Language), t = text[lang], q = useApi(`/stores/${id}`)
+  useEffect(() => { if (q.data) rememberShop(q.data.store_id) }, [q.data])
   const [cart, setCart] = useState({}), [order, setOrder] = useState(null)
   const preview = useMutation({ mutationFn: () => api('/orders/preview', { method: 'POST', body: { store_id: Number(id), lang, items: Object.entries(cart).filter(([, qty]) => qty > 0).map(([menu_id, qty]) => ({ menu_id: Number(menu_id), qty })) } }), onSuccess: setOrder })
   const count = Object.values(cart).reduce((a, b) => a + b, 0)
   function change(menuId, delta) { setCart(c => ({ ...c, [menuId]: Math.max(0, Math.min(50, (c[menuId] || 0) + delta)) })); setOrder(null) }
   return <State query={q}>{q.data && <><div className="store-heading"><div><span className="eyebrow">{q.data.market.name}</span><h1>{q.data.name}</h1><p>{q.data.address}</p><p>{q.data.hours}</p><div className="tags">{q.data.payment.map(p => <span key={p}>{p}</span>)}</div></div><a className="button outline" href={mediaUrl(q.data.directions_url)} target="_blank" rel="noreferrer">⌖ {t[12]} ↗</a></div><div className="store-layout"><div><section className="story"><span className="eyebrow">FROM THE MERCHANT</span><h2>{u.story}</h2><p>{q.data.story || q.data.story_ko}</p></section>{q.data.videos.map(v => <div className="store-video" key={v.video_id}><VideoPlayer video={v} /></div>)}</div><section className="menu-panel" id="menu"><h2>{t[9]} <span className="small">{q.data.menus.length}</span></h2>{q.data.menus.map(m => <article className="menu-row" key={m.menu_id}><div><h3>{m.name}</h3>{lang !== 'ko' && <p>{m.name_ko}</p>}<p>{m.description}</p>{m.how_to_eat && <details><summary>{u.how}</summary><p>{m.how_to_eat}</p></details>}<div className="tags"><span>{'🌶'.repeat(m.spicy_level) || u.mild}</span>{m.is_ai_guess && <span>{u.ai}</span>}</div><strong><Money value={m.price} /></strong></div><div className="stepper"><button aria-label={`${m.name} -1`} disabled={!cart[m.menu_id]} onClick={() => change(m.menu_id, -1)}>−</button><output>{cart[m.menu_id] || 0}</output><button aria-label={`${m.name} +1`} disabled={cart[m.menu_id] >= 50} onClick={() => change(m.menu_id, 1)}>+</button></div></article>)}{!q.data.menus.length && <Empty />}<ErrorMessage error={preview.error} /><button className="button full" disabled={!count || preview.isPending} onClick={() => preview.mutate()}>{preview.isPending ? u.loading : `${t[10]} · ${count}`} →</button><p className="small">{u.orderNote}</p></section></div>{order && <Dialog label={t[11]} onClose={() => setOrder(null)}><button className="close" onClick={() => setOrder(null)} autoFocus aria-label={u.close}>×</button><span className="eyebrow">ORDER CARD</span><p>{t[11]}</p><h2>{order.ko_message}</h2>{order.ko_lines.map((line, i) => <div className="order-line" key={i}><strong>{line}</strong><p>{order.translated_lines[i]}</p></div>)}<div className="total">{u.total}<strong><Money value={order.total_price} /></strong></div><button className="button full" onClick={() => setOrder(null)}>{u.ok}</button></Dialog>}</>}</State>
-}
-function Contents() {
-  const u = copy[useContext(Language)]
-  const q = useApi('/contents')
-  return <><div className="page-heading"><span className="eyebrow">K-CONTENT, REAL FLAVORS</span><h1>{u.foodTitle}</h1><p>{u.foodSubtitle}</p></div><State query={q}><div className="market-grid">{q.data?.map((c, i) => <Link className={`content-card art-${i % 4}`} key={c.content_id} to={`/contents/${c.content_id}`}><span className="eyebrow">{c.platform} · {c.genre}</span><span className="content-symbol">{['🍱', '🍜', '🍙', '🥘'][i % 4]}</span><h2>{c.title} ↗</h2><p>{c.foods.join(' · ')}</p></Link>)}</div>{q.data?.length === 0 && <Empty />}</State></>
 }
 function Content() {
   const u = copy[useContext(Language)]
@@ -57,7 +55,16 @@ function Shell() {
   const [lang, setLang] = useState(() => {
     try { const saved = localStorage.getItem('market-lang'); return ['en', 'ko', 'zh'].includes(saved) ? saved : 'en' } catch { return 'en' }
   })
+  const [subtitleChoice, setSubtitleChoice] = useState(() => {
+    try { const saved = localStorage.getItem('golmok-subtitle-lang'); return ['en', 'ko', 'zh'].includes(saved) ? saved : 'auto' } catch { return 'auto' }
+  })
+  function changeSubtitles(next) {
+    if (!['auto', 'en', 'ko', 'zh'].includes(next)) return
+    setSubtitleChoice(next)
+    try { localStorage.setItem('golmok-subtitle-lang', next) } catch { /* Optional preference. */ }
+  }
   const location = useLocation(), t = copy[lang]
+  const customHeader = ['/contents', '/profile'].includes(location.pathname)
   const isFeed = location.pathname === '/' || location.pathname === '/shorts'
   function changeLanguage(next) {
     if (!['en', 'ko', 'zh'].includes(next)) return
@@ -65,9 +72,9 @@ function Shell() {
     try { localStorage.setItem('market-lang', next) } catch { /* Storage is optional. */ }
   }
   return <Language.Provider value={lang}><LanguageSettings.Provider value={changeLanguage}>
-    <PagePosition/>
-    {!isFeed && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools"><LanguageSelect/></div></header>}
-    <main className={isFeed ? 'feed-main' : ''} key={location.pathname + lang}><Routes>
+    <SubtitleSettings.Provider value={{ lang: subtitleChoice === 'auto' ? lang : subtitleChoice, choice: subtitleChoice, setChoice: changeSubtitles }}><PagePosition/>
+    {!isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools"><LanguageSelect/></div></header>}
+    <main className={isFeed ? 'feed-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
       <Route path="/" element={<Shorts/>}/><Route path="/shorts" element={<Shorts/>}/>
       <Route path="/markets" element={<Explore/>}/><Route path="/markets/:id" element={<Market/>}/>
       <Route path="/stores/:id" element={<Store/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
@@ -75,14 +82,15 @@ function Shell() {
       <Route path="/profile" element={<Profile/>}/><Route path="/merchant/*" element={<Merchant/>}/>
       <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>
     </Routes></main>
-    {!isFeed && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
+    {!isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
     <nav className="mobile-nav" aria-label={t.map}>
       <NavLink to="/" end className={({ isActive }) => isActive || location.pathname === '/shorts' ? 'active' : ''}><NavIcon type="feed"/><span>{t.feed}</span></NavLink>
       <NavLink to="/contents"><NavIcon type="contents"/><span>{t.contents}</span></NavLink>
       <NavLink to="/markets"><NavIcon type="map"/><span>{t.map}</span></NavLink>
       <NavLink to="/profile"><NavIcon type="profile"/><span>{t.profile}</span></NavLink>
     </nav>
-  </LanguageSettings.Provider></Language.Provider>
+  </SubtitleSettings.Provider></LanguageSettings.Provider></Language.Provider>
 }
 export default function App() { return <QueryClientProvider client={client}><BrowserRouter><Shell /></BrowserRouter></QueryClientProvider> }
+
 
