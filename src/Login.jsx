@@ -31,7 +31,7 @@ export function MerchantLogin() {
   return <div className="login-page">
     <div className="login-top"><Link className="back" to="/login">← 처음으로</Link></div>
     <div className="login-hero"><span className="eyebrow">사장님 모드</span><h1>사장님, 어서 오세요</h1><p>내 가게를 바로 관리할 수 있어요.</p></div>
-    <div className="panel login-form"><span className="small">내 가게</span><strong className="login-store">{store.data ? store.data.name_ko || store.data.name : store.isError ? '가게 정보를 불러오지 못했어요' : '불러오는 중…'}</strong><button className="button full" onClick={() => login('/merchant/video')}>이 가게로 시작하기</button></div>
+    <div className="panel login-form"><span className="small">내 가게</span><strong className="login-store">{store.data ? store.data.name_ko || store.data.name : store.isError ? '가게 정보를 불러오지 못했어요' : '불러오는 중…'}</strong><button className="button full" onClick={() => login('/merchant')}>이 가게로 시작하기</button></div>
     <div className="login-new"><p>가게 정보를 새로 말해 주실래요?</p><button className="button outline full" onClick={() => login('/merchant/register')}>말로 가게 등록하기</button></div>
   </div>
 }

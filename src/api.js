@@ -11,6 +11,13 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   return data
 }
 export function mediaUrl(url) {
-  if (!url) return undefined
-  try { const u = new URL(url, `${new URL(API_BASE, window.location.origin).origin}/`); return ['https:', 'http:'].includes(u.protocol) ? u.href : undefined } catch { return undefined }
+  if (typeof url !== 'string' || !url.trim()) return undefined
+  try {
+    const origin = window.location.origin
+    const base = import.meta.env.VITE_MEDIA_BASE_URL?.trim() || new URL(API_BASE, origin).origin
+    const resolved = new URL(url.trim(), `${base.replace(/\/$/, '')}/`)
+    // Blob URLs are created locally for the host's selected photo previews.
+    if (resolved.protocol === 'blob:') return resolved.origin === origin ? resolved.href : undefined
+    return ['https:', 'http:'].includes(resolved.protocol) ? resolved.href : undefined
+  } catch { return undefined }
 }

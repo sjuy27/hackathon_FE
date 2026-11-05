@@ -54,7 +54,7 @@ function Shell() {
   const viewLang = isMerchant ? 'ko' : lang, t = copy[viewLang]
   const customHeader = ['/contents', '/profile'].includes(location.pathname) || isLogin
   const storeRoute = /^\/stores\/[^/]+(?:\/order)?$/.test(location.pathname)
-  const designRoute = location.pathname === '/contents' || /^\/markets(?:\/[^/]+)?$/.test(location.pathname) || storeRoute
+  const designRoute = (isMerchant && !isLogin) || location.pathname === '/contents' || /^\/markets(?:\/[^/]+)?$/.test(location.pathname) || storeRoute
   const isFeed = location.pathname === '/' || location.pathname === '/shorts'
   function changeLanguage(next) {
     if (!['en', 'ko', 'zh'].includes(next)) return
@@ -69,16 +69,16 @@ function Shell() {
       <Route path="/markets" element={<MarketFeedPage/>}/><Route path="/markets/:id" element={<MarketMenuFeedPage/>}/>
       <Route path="/stores/:id" element={<StoreMenuPage/>}/><Route path="/stores/:id/order" element={<OrderPreviewPage/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<ContentsFeedPage/>}/><Route path="/contents/:id" element={<Content/>}/>
-      <Route path="/profile" element={<Profile/>}/><Route path="/login" element={<Login/>}/><Route path="/merchant/login" element={<MerchantLogin/>}/><Route path="/merchant/*" element={<Merchant/>}/>
+      <Route path="/host" element={<Navigate to="/merchant" replace/>}/><Route path="/profile" element={<Profile/>}/><Route path="/login" element={<Login/>}/><Route path="/merchant/login" element={<MerchantLogin/>}/><Route path="/merchant/*" element={<Merchant/>}/>
       <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>
     </Routes></main>
     {!designRoute && !isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
-    {isLogin || storeRoute ? null : isMerchant ? <nav className="mobile-nav" aria-label="사장님 메뉴">
-      <NavLink to="/merchant/register"><NavIcon type="mic"/><span>가게 등록</span></NavLink>
-      <NavLink to="/merchant/video"><NavIcon type="video"/><span>영상 만들기</span></NavLink>
-      <NavLink to="/merchant/edit"><NavIcon type="edit"/><span>정보 수정</span></NavLink>
-      <NavLink to="/" end><NavIcon type="feed"/><span>손님 화면</span></NavLink>
-    </nav> : <nav className="mobile-nav" aria-label={t.map}>
+    {isLogin || storeRoute ? null : isMerchant ? (!['/merchant/register','/merchant/review','/merchant/video'].includes(location.pathname) && <nav className="mobile-nav host-navigation" aria-label="사장님 메뉴">
+      <NavLink to="/merchant" end><NavIcon type="home"/><span>홈</span></NavLink>
+      <NavLink to="/merchant/edit"><NavIcon type="store"/><span>가게 정보</span></NavLink>
+      <NavLink to="/markets"><NavIcon type="map"/><span>지도</span></NavLink>
+      <NavLink to="/merchant/stats"><NavIcon type="stats"/><span>통계</span></NavLink>
+    </nav>) : <nav className="mobile-nav" aria-label={t.map}>
       <NavLink to="/" end className={({ isActive }) => isActive || location.pathname === '/shorts' ? 'active' : ''}><NavIcon type="feed"/><span>{t.feed}</span></NavLink>
       <NavLink to="/contents"><NavIcon type="contents"/><span>{t.contents}</span></NavLink>
       <NavLink to="/markets"><NavIcon type="map"/><span>{t.map}</span></NavLink>
