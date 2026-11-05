@@ -58,6 +58,13 @@ export default function OnboardingFlow({ store, onPublished, review = false }) {
   const publish = useMutation({mutationFn:()=>api(`/merchant/onboarding/sessions/${sessionId}/publish`,{method:'POST'}),onSuccess:data=>{remember('golmok-store',data.store_id);remember('golmok-session','');onPublished(data.store_id)}})
   function resetSession() { setEntryIntroductionDone(false);setGreetedSession(null);remember('golmok-session-intro','');setVoiceEnabled(true);started.current=false;setSessionId(null);reset(null);setDone(false);remember('golmok-session','');start.reset();send.reset();confirm.reset() }
   function restartRegistration() { resetSession(); navigate('/merchant/register', { state: { voice: true } }) }
+  async function onSavedStep(step) {
+    const warnings = { ...answerWarnings, steps: { ...answerWarnings.steps } }
+    delete warnings.steps[step]
+    setAnswerWarnings(warnings)
+    remember(WARNINGS_KEY,JSON.stringify(warnings))
+    await summary.refetch()
+  }
   // 현재 단계만 다시 받는다. 앞 단계의 답변은 기존 서버 세션에 그대로 둔다.
   const active = question || (sessionId && summary.isFetchedAfterMount && summary.data && {step:summary.data.step,question_ko:fallbackQuestions[summary.data.step]})
   const resuming = !question && active && active.step !== STEPS[0] && !summary.data?.done
@@ -71,6 +78,6 @@ export default function OnboardingFlow({ store, onPublished, review = false }) {
   }
   if (!review && (done || (!question && summary.isFetchedAfterMount && summary.data?.done))) return <Navigate to="/merchant/review" replace/>
   if (review && !sessionId) return <div className="mobile-page host-page"><PageHeader title="AI 정리 결과" back="/merchant" showLanguage={false}/><p>가게 등록을 먼저 시작해주세요.</p><Button to="/merchant/register" primary>말로 가게 등록하기</Button></div>
-  if (review) return <HostReviewPage summary={summary} sessionId={sessionId} publish={publish} store={store} onRestart={restartRegistration}/>
+  if (review) return <HostReviewPage summary={summary} sessionId={sessionId} publish={publish} store={store} onRestart={restartRegistration} onSavedStep={onSavedStep}/>
   return <HostRegistrationPage flow={{active,summary,answer,input,setInput,manualInput,setManualInput,capturing,setCapturing,voiceEnabled,setVoiceEnabled,send,confirm,start,submit,acceptAnswer,resetSession,sent,sessionId,intro,onIntroDone,replayQuestion:()=>{spoken.current?.();spoken.current=speakQuestion(active?.question_ko || fallbackQuestions.store_name,()=>{})}}}/>
 }
