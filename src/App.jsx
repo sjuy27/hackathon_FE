@@ -76,7 +76,6 @@ function Shell() {
     {isLogin || storeRoute ? null : isMerchant ? (!['/merchant/register','/merchant/review','/merchant/video'].includes(location.pathname) && <nav className="mobile-nav host-navigation" aria-label="사장님 메뉴">
       <NavLink to="/merchant" end><NavIcon type="home"/><span>홈</span></NavLink>
       <NavLink to="/merchant/edit"><NavIcon type="store"/><span>가게 정보</span></NavLink>
-      <NavLink to="/markets"><NavIcon type="map"/><span>지도</span></NavLink>
       <NavLink to="/merchant/stats"><NavIcon type="stats"/><span>통계</span></NavLink>
     </nav>) : <nav className="mobile-nav" aria-label={t.map}>
       <NavLink to="/" end className={({ isActive }) => isActive || location.pathname === '/shorts' ? 'active' : ''}><NavIcon type="feed"/><span>{t.feed}</span></NavLink>

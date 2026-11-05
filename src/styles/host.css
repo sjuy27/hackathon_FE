@@ -22,6 +22,7 @@
 .host-page button:hover { background: var(--color-field); }
 .host-page .mobile-button.primary:hover { background: var(--color-clay-hover); }
 .host-page .mobile-button:disabled { cursor: not-allowed; }
+.host-navigation > a { flex: 1; width: auto; }
 .host-home-top { display: flex; align-items: center; justify-content: space-between; gap: var(--mobile-gap); padding: var(--mobile-inset) 0; }
 .host-mode { background: var(--color-selected); color: var(--color-clay); padding: calc(var(--spacing-unit) * 2) var(--mobile-gap); border-radius: var(--radius-control); font-size: var(--text-caption); }
 .host-home-top .mobile-button { border-radius: calc(var(--spacing-unit) * 6); font-size: var(--text-caption); }
@@ -137,4 +138,6 @@
 .host-subtitle-options input { accent-color: var(--color-clay); margin: 0; }
 .host-video-result video { aspect-ratio: 9 / 16; object-fit: contain; max-height: calc(var(--screen-height) * .65); }
 .host-edit-page .panel { padding: var(--mobile-inset); margin-top: var(--mobile-inset); }
+.host-edit-page .panel > form { margin-bottom: calc(var(--spacing-unit) * 8); }
+.host-edit-page .panel > h3 { margin: 0 0 var(--mobile-inset); }
 @media (max-width: 359px) { :root { --host-photo-size: 72px; } .host-home-intro { font-size: var(--text-body); } .host-action-card small { font-size: var(--text-caption); } }
