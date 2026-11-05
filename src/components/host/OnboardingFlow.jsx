@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '../../api'
 import { speakQuestion } from '../../merchant-voice'
@@ -11,7 +11,7 @@ import { Button, PageHeader } from '../MobileUI'
 const INTRODUCTION = '안녕하세요 사장님. 지금부터 가게에 대해 다섯 가지를 여쭤볼게요. 말씀하시고 잠깐 쉬시면 자동으로 다음으로 넘어가요.'
 
 export default function OnboardingFlow({ store, onPublished, review = false }) {
-  const location = useLocation()
+  const location = useLocation(), navigate = useNavigate()
   const [entryIntroductionDone,setEntryIntroductionDone] = useState(false), [greetedSession,setGreetedSession] = useState(() => saved('golmok-session-intro'))
   const [sessionId,setSessionId] = useState(() => saved('golmok-session')), [question,setQuestion] = useState(null), [answer,setAnswer] = useState(null), [edits,setEdits] = useState({}), [input,setInput] = useState(''), [manualInput,setManualInput] = useState(false), [capturing,setCapturing] = useState(false), [sent,setSent] = useState(''), [done,setDone] = useState(false), [voiceEnabled,setVoiceEnabled] = useState(() => location.state?.voice === true)
   const sending = useRef(false), confirming = useRef(false), started = useRef(false), spoken = useRef(null)
@@ -27,6 +27,7 @@ export default function OnboardingFlow({ store, onPublished, review = false }) {
   function acceptAnswer(accepted) {if(confirming.current || !answer)return;confirming.current=true;confirm.mutate(accepted)}
   const publish = useMutation({mutationFn:()=>api(`/merchant/onboarding/sessions/${sessionId}/publish`,{method:'POST'}),onSuccess:data=>{remember('golmok-store',data.store_id);remember('golmok-session','');onPublished(data.store_id)}})
   function resetSession() { setEntryIntroductionDone(false);setGreetedSession(null);remember('golmok-session-intro','');setVoiceEnabled(true);started.current=false;setSessionId(null);reset(null);setDone(false);remember('golmok-session','');start.reset();send.reset();confirm.reset() }
+  function restartRegistration() { resetSession(); navigate('/merchant/register', { state: { voice: true } }) }
   // 현재 단계만 다시 받는다. 앞 단계의 답변은 기존 서버 세션에 그대로 둔다.
   const active = question || (sessionId && summary.isFetchedAfterMount && summary.data && {step:summary.data.step,question_ko:fallbackQuestions[summary.data.step]})
   const resuming = !question && active && active.step !== STEPS[0] && !summary.data?.done
@@ -40,6 +41,6 @@ export default function OnboardingFlow({ store, onPublished, review = false }) {
   }
   if (!review && (done || (!question && summary.isFetchedAfterMount && summary.data?.done))) return <Navigate to="/merchant/review" replace/>
   if (review && !sessionId) return <div className="mobile-page host-page"><PageHeader title="AI 정리 결과" back="/merchant" showLanguage={false}/><p>가게 등록을 먼저 시작해주세요.</p><Button to="/merchant/register" primary>말로 가게 등록하기</Button></div>
-  if (review) return <HostReviewPage summary={summary} sessionId={sessionId} publish={publish} store={store}/>
+  if (review) return <HostReviewPage summary={summary} sessionId={sessionId} publish={publish} store={store} onRestart={restartRegistration}/>
   return <HostRegistrationPage flow={{active,summary,answer,edits,setEdits,input,setInput,manualInput,setManualInput,capturing,setCapturing,voiceEnabled,setVoiceEnabled,send,confirm,start,submit,acceptAnswer,resetSession,sent,sessionId,intro,onIntroDone,replayQuestion:()=>{spoken.current?.();spoken.current=speakQuestion(active?.question_ko || fallbackQuestions.store_name,()=>{})}}}/>
 }
