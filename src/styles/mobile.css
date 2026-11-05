@@ -111,22 +111,18 @@ main.feed-main { height: calc(var(--screen-height) - var(--mobile-nav-height) - 
 .short-play { width: var(--feed-play-size); height: var(--feed-play-size); top: 38%; border: 0; font-size: var(--text-title); background: var(--color-play-scrim); }
 .short-tools { z-index: 3; right: var(--mobile-inset); bottom: calc(var(--feed-card-height) + var(--mobile-inset) * 3); gap: var(--mobile-inset); }
 .short-tools button { min-height: calc(var(--spacing-unit) * 10); height: auto; background: transparent; padding: 0; color: var(--color-paper); }
-.short-tools button span { font-size: var(--text-micro); }
-.short-caption { z-index: 2; left: var(--mobile-inset); right: calc(var(--spacing-unit) * 15); bottom: calc(var(--feed-card-height) + var(--mobile-inset) * 2); }
-.short-caption h2 { font-size: var(--text-body); font-weight: var(--weight-bold); margin-bottom: calc(var(--spacing-unit) * 2); }
-.short-caption p { font-size: var(--text-caption); line-height: var(--leading-body); color: var(--color-paper); margin: 0; }
-.short-subtitle { bottom: calc(var(--feed-card-height) + var(--mobile-inset) * 8); }
 .feed-store-card { position: absolute; z-index: 3; bottom: var(--spacing-unit); left: var(--mobile-gap); right: var(--mobile-gap); padding: var(--mobile-gap); background: var(--color-paper); color: var(--color-ink); border-radius: var(--radius-card); min-height: var(--feed-card-height); display: flex; flex-direction: column; justify-content: space-between; gap: var(--mobile-gap); }
 .feed-store-info { display: flex; gap: var(--mobile-gap); align-items: center; min-width: 0; }
 .feed-store-info > div { flex: 1; min-width: 0; }
 .feed-store-info h3 { margin: 0 0 var(--spacing-unit); font-size: var(--text-body); line-height: var(--leading-tight); }
 .feed-store-info p { margin: 0; font-size: var(--text-micro); line-height: var(--leading-body); color: var(--color-muted); }
+.feed-card-message { margin: 0; color: var(--color-muted); font-size: var(--text-caption); line-height: var(--leading-body); }
 .feed-store-card .short-shop-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: calc(var(--spacing-unit) * 2); margin: 0; }
 .feed-store-card .short-shop-actions a { border: 1px solid var(--color-line); padding: calc(var(--spacing-unit) * 2); border-radius: var(--radius-control); min-height: calc(var(--spacing-unit) * 11); font-size: var(--text-caption); }
 .feed-store-card .short-shop-actions .primary { background: var(--color-clay); border-color: var(--color-clay); }
 .mobile-nav { height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); width: min(100%,var(--app-width)); bottom: var(--frame-offset); }
 .mobile-nav a.active { color: var(--color-clay); }
-@media (max-height: 620px) { :root { --feed-card-height: 136px; } .short-caption p { -webkit-line-clamp: 1; } }
+@media (max-height: 620px) { :root { --feed-card-height: 136px; } }
 
 /* feed.png: compact shop menu and fixed order summary. */
 :root { --selection-bar-height: 112px; }

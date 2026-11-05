@@ -106,14 +106,14 @@ export default function SpeechAnswer({ value, onChange, onAutoSubmit, onAudio, o
       clearTimeout(silence.current); clearTimeout(limit.current)
       if (['network', 'service-not-allowed', 'language-not-supported'].includes(e.error) && onAudio) {
         cancelled.current = true; r.onend = null; r.abort(); rec.current = null; setListening(false)
-        setRecordInstead(true); setReady(true); setError('받아쓰기 대신 녹음으로 듣고 있어요. 말한 뒤 3초간 쉬면 전송돼요.'); return
+        setRecordInstead(true); setReady(true); setError('받아쓰기 대신 녹음으로 듣고 있어요. 말한 뒤 2초간 쉬면 전송돼요.'); return
       }
       cancelled.current = true; setError(e.error === 'not-allowed' ? '마이크 권한을 허용해 주세요.' : '음성을 알아듣지 못했어요. 다시 말하거나 글로 적어 주세요.')
     }
     r.onend = () => {
       if (rec.current !== r) return
       if (!cancelled.current && !stopping.current && latestText.current.trim()) {
-        // 모바일이 먼저 수집을 끝내도 3초 침묵 타이머를 유지하며 다시 듣는다.
+        // 모바일이 먼저 수집을 끝내도 2초 침묵 타이머를 유지하며 다시 듣는다.
         base.current = `${latestText.current.trimEnd()} `; from.current = 0; seen.current = 0
         try { r.start(); return } catch { /* 아래에서 수집을 종료하고 최신 답변을 보낸다. */ }
       }
@@ -153,11 +153,11 @@ export default function SpeechAnswer({ value, onChange, onAutoSubmit, onAudio, o
     {error && <p className="host-muted" role="status">{error}</p>}
   </div>
   return <>
-    <label>말하거나 적어 주세요<textarea maxLength={maxLength} disabled={disabled} value={value} onChange={e => edit(e.target.value)} placeholder="질문을 듣고 답해 주세요. 3초간 말이 없으면 자동으로 전송돼요." /></label>
+    <label>말하거나 적어 주세요<textarea maxLength={maxLength} disabled={disabled} value={value} onChange={e => edit(e.target.value)} placeholder="질문을 듣고 답해 주세요. 2초간 말이 없으면 자동으로 전송돼요." /></label>
     <div className="audio-input">
       {!(recordInstead && ready) && <button type="button" disabled={disabled} className={`button outline ${listening ? 'listening' : ''}`} onClick={() => speaking ? (spoken.current?.(), setSpeaking(false), startListening()) : listening ? stop() : begin()}>{speaking ? '질문 건너뛰고 답하기' : listening ? '■ 답변 마치기' : '● 질문 듣고 답하기'}</button>}
       {(speaking || listening || ready) && <button type="button" onClick={() => { pause(); startedPrompt.current = prompt }}>대화 일시정지</button>}
-      <span className="listening-hint" role="status">{speaking ? '질문을 읽고 있어요…' : listening || ready ? '듣고 있어요 · 3초간 쉬면 자동 전송' : ''}</span>
+      <span className="listening-hint" role="status">{speaking ? '질문을 읽고 있어요…' : listening || ready ? '듣고 있어요 · 2초간 쉬면 자동 전송' : ''}</span>
       {error && <><p className="small" role="status">{error}</p><button type="button" disabled={disabled} onClick={() => { pause(); cancelled.current = false; startListening() }}>질문 없이 답하기</button></>}
     </div>
     {recordInstead && ready && <VoiceRecorder label="● 녹음해서 답하기" autoStart maxSeconds={maxSeconds} onDone={file => { setReady(false); onAudio?.(file) }} onRecordingChange={onRecordingChange} />}

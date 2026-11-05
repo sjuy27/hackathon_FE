@@ -261,11 +261,6 @@ main.feed-main { padding: 0; min-height: 0; height: calc(100dvh - 62px - env(saf
 .short-tools button { width: 40px; height: 42px; min-height: 40px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; color: white; background: transparent; border: 0; border-radius: 50%; padding: 0; }
 .short-tools button span { font-size: 10px; line-height: 1.2; font-weight: 500; color: white; }
 .short-tools button[aria-pressed=true] svg { fill: #f4d5c8; color: #fff; }
-.short-caption { position: absolute; z-index: 2; left: 16px; right: 64px; bottom: calc(var(--shop-h) + 24px); color: white; text-shadow: 0 1px 4px #0008; }
-.short-caption h2 { font-size: 13px; line-height: 18px; font-weight: 700; letter-spacing: 0; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.short-caption p { color: #fff; font-size: 12px; line-height: 18px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* Center subtitles while reserving a side gutter for the right-hand tools. */
-.short-subtitle { position: absolute; z-index: 2; bottom: calc(var(--shop-h) + 24px + 56px); left: 16px; right: 16px; width: fit-content; max-width: calc(100% - 140px); margin-inline: auto; color: white; text-align: center; font-size: 16px; line-height: 1.4; font-weight: 700; background: #000a; padding: 4px 10px; border-radius: 6px; white-space: pre-line; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; max-height: calc(2 * 1.4 * 16px + 8px); overflow: hidden; pointer-events: none; }
 .short-shop { position: absolute; z-index: 3; bottom: var(--gap); left: var(--gap); right: var(--gap); height: var(--shop-h); max-height: 72px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: white; color: #202020; border-radius: 13px; box-shadow: 0 2px 10px #00000012; }
 .short-shop-info { display: flex; flex: 1; gap: 8px; align-items: center; min-width: 0; }
 .short-shop-info > div:last-child { min-width: 0; flex: 1; }
@@ -279,7 +274,6 @@ main.feed-main { padding: 0; min-height: 0; height: calc(100dvh - 62px - env(saf
 .short-shop-actions a { height: 40px; min-height: 40px; display: grid; place-items: center; border-radius: 8px; border: 1px solid #ccc; font-size: 11px; line-height: 1.2; font-weight: 700; text-align: center; }
 .short-shop-actions .shop-order { width: 112px; padding: 4px; color: white; background: var(--primary); border-color: var(--primary); }
 .short-shop-actions .shop-visit { width: 40px; padding: 0; color: #333; }
-.short-video-error { position: absolute; top: 35%; left: 20px; right: 20px; color: white; text-align: center; }
 .shorts-page > .state { margin: 0; padding-top: 130px; border: 0; color: white; }
 .shorts-page .state p { color: white; }
 .feed-more { scroll-snap-align: end; padding: 30px 16px; text-align: center; }
@@ -310,7 +304,6 @@ select.language-pill { width: 43px; height: 32px; flex-shrink: 0; appearance: no
 .shorts-topbar { gap: 21px; height: 52px; padding: 8px 16px; }
 .shorts-topbar select.language-pill { color: white; background: #0001; border-color: #fff8; margin-left: auto; }
 .shorts-topbar > a { font-size: 13px; font-weight: 500; }
-.share-message { position: absolute; z-index: 3; top: 90px; left: 20px; right: 20px; text-align: center; color: white; background: #0008; border-radius: 8px; padding: 8px; font-size: 12px; }
 .catalog-search { display: flex; align-items: center; gap: 10px; background: #f0f0f0; padding: 0 12px; border-radius: 11px; margin: 16px 0 13px; }
 .catalog-search input:not([type=checkbox]):not([type=file]) { background: transparent; border: 0; padding: 13px 0; width: 100%; font-size: 13px; min-width: 0; }
 .catalog-filters { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 5px; }

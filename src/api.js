@@ -1,3 +1,5 @@
+import { localizeSchedules } from './schedule'
+
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/$/, '')
 export async function api(path, { method = 'GET', body, signal } = {}) {
   const response = await fetch(`${API_BASE}${path}`, { method, signal, headers: body == null || body instanceof FormData ? undefined : { 'Content-Type': 'application/json' }, body: body == null ? undefined : body instanceof FormData ? body : JSON.stringify(body) })
@@ -8,7 +10,7 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
     throw new Error(data?.error?.message || detail || `요청 실패 (${response.status})`)
   }
   if (data === null) throw new Error('API 응답을 읽을 수 없습니다. 잠시 후 다시 시도해주세요.')
-  return data
+  return method === 'GET' ? localizeSchedules(data,new URLSearchParams(path.split('?')[1] || '').get('lang')) : data
 }
 export function mediaUrl(url) {
   if (typeof url !== 'string' || !url.trim()) return undefined

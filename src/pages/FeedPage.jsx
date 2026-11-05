@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { api, mediaUrl } from '../api'
-import { Language, SubtitleSettings, useApi } from '../data'
+import { Language } from '../data'
 import { copy } from '../locale'
 import { designCopy } from '../design-copy'
 import { readIds, writeIds } from '../local-history'
@@ -11,49 +11,20 @@ import { LanguageSelect, NavIcon } from '../Profile'
 import StorePreviewCard from '../components/StorePreviewCard'
 
 function Clip({ item }) {
-  const lang = useContext(Language), t = copy[lang], d = designCopy[lang], subtitles = useContext(SubtitleSettings), video = useRef(null)
-  const [paused, setPaused] = useState(true), [failed, setFailed] = useState(false), [active, setActive] = useState(false)
-  const [saved, setSaved] = useState(() => readIds('golmok-saved-videos').includes(item.video_id))
+  const lang = useContext(Language), t = copy[lang], d = designCopy[lang], video = useRef(null)
+  const [paused, setPaused] = useState(true), [failed, setFailed] = useState(false)
   const [liked, setLiked] = useState(() => readIds('golmok-liked-videos').includes(item.video_id))
-  const [message, setMessage] = useState(''), [cueText, setCueText] = useState('')
-  const store = item.store, detail = useApi(`/stores/${store.store_id}`, active)
+  const [message, setMessage] = useState('')
+  const store = item.store
   useEffect(() => {
     const player = video.current
     let visible = false
     function sync() { if (visible && !document.hidden) player.play().catch(() => {}); else player.pause() }
-    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting && entry.intersectionRatio >= .65; setActive(visible); sync() }, { threshold: .65 })
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting && entry.intersectionRatio >= .65; sync() }, { threshold: .65 })
     observer.observe(player)
     document.addEventListener('visibilitychange', sync)
     return () => { observer.disconnect(); document.removeEventListener('visibilitychange', sync); player.pause() }
   }, [])
-  useEffect(() => {
-    const player = video.current
-    let selected = null, disposed = false
-    function syncCues() {
-      if (disposed) return
-      setCueText(Array.from(selected?.activeCues || [], cue => cue.text).join('\n'))
-    }
-    function selectTrack() {
-      selected?.removeEventListener('cuechange', syncCues)
-      selected = null
-      for (const track of player.textTracks) {
-        const chosen = track.language === subtitles.lang
-        track.mode = chosen ? 'hidden' : 'disabled'
-        if (chosen) selected = track
-      }
-      selected?.addEventListener('cuechange', syncCues)
-      syncCues()
-    }
-    selectTrack()
-    player.addEventListener('loadedmetadata', selectTrack)
-    player.textTracks.addEventListener('addtrack', selectTrack)
-    return () => {
-      disposed = true
-      selected?.removeEventListener('cuechange', syncCues)
-      player.removeEventListener('loadedmetadata', selectTrack)
-      player.textTracks.removeEventListener('addtrack', selectTrack)
-    }
-  }, [subtitles.lang])
   function toggle(key, value, setter) {
     writeIds(key, value ? readIds(key).filter(id => id !== item.video_id) : [item.video_id, ...readIds(key)].slice(0, 50))
     setter(!value)
@@ -67,13 +38,10 @@ function Clip({ item }) {
   }
   return <article className="short-slide" aria-label={store.name}>
     <video ref={video} className="short-video" src={mediaUrl(item.video_url)} poster={mediaUrl(item.thumbnail_url)} playsInline loop muted preload="metadata" crossOrigin="anonymous" onPlay={() => setPaused(false)} onPause={() => setPaused(true)} onError={() => setFailed(true)}>
-      {Object.entries(item.subtitles || {}).map(([code, url]) => <track key={code} kind="subtitles" src={mediaUrl(url)} srcLang={code} label={{ en: 'English', ko: '한국어', zh: '中文' }[code] || code}/>)}
-    </video><div className="short-shade"/>{cueText && <div className="short-subtitle" aria-live="off">{cueText}</div>}
-    {failed ? <p className="short-video-error" role="status">{t.videoError}</p> : <button className={`short-play ${paused ? 'is-paused' : ''}`} aria-label={paused ? t.play : t.pause} onClick={() => paused ? video.current.play().catch(() => {}) : video.current.pause()}>{paused ? '▷' : 'Ⅱ'}</button>}
-    <div className="short-tools"><button aria-label={liked ? d.liked : d.like} aria-pressed={liked} onClick={() => toggle('golmok-liked-videos', liked, setLiked)}><NavIcon type="like"/></button><button aria-label={saved ? d.saved : d.save} aria-pressed={saved} onClick={() => toggle('golmok-saved-videos', saved, setSaved)}><NavIcon type="save"/><span>{saved ? d.saved : d.save}</span></button><button onClick={share}><NavIcon type="share"/><span>{d.share}</span></button></div>
-    {message && <p className="share-message" role="status">{message}</p>}
-    <div className="short-caption"><h2>{store.name} · {store.market}</h2><p>{detail.data?.story || store.top_menu?.name}</p></div>
-    <StorePreviewCard item={item}/>
+    </video><div className="short-shade"/>
+    {!failed && <button className={`short-play ${paused ? 'is-paused' : ''}`} aria-label={paused ? t.play : t.pause} onClick={() => paused ? video.current.play().catch(() => {}) : video.current.pause()}>{paused ? '▷' : 'Ⅱ'}</button>}
+    <div className="short-tools"><button aria-label={liked ? d.liked : d.like} aria-pressed={liked} onClick={() => toggle('golmok-liked-videos', liked, setLiked)}><NavIcon type="like"/></button><button onClick={share} aria-label={d.share}><NavIcon type="share"/></button></div>
+    <StorePreviewCard item={item} message={failed ? t.videoError : message}/>
   </article>
 }
 export default function FeedPage() {
