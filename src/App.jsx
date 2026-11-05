@@ -3,7 +3,7 @@ import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useLocation, use
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { mediaUrl } from './api'
 import { Empty, Money, State, VideoPlayer } from './shared'
-import { Language, LanguageSettings, SubtitleSettings, text, useApi } from './data'
+import { Language, LanguageSettings, SubtitleSettings, useApi } from './data'
 import { Merchant } from './Merchant'
 import { Login, MerchantLogin } from './Login'
 import { readRole } from './auth'
@@ -15,17 +15,11 @@ import { copy } from './locale'
 import ContentsFeedPage from './pages/ContentsFeedPage'
 import StoreMenuPage from './pages/StoreMenuPage'
 import OrderPreviewPage from './pages/OrderPreviewPage'
+import MarketFeedPage from './pages/MarketFeedPage'
 
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30000 } } })
 function StoreCard({ store, index = 0 }) {
   return <Link className="market-card" to={`/stores/${store.store_id}`}><div className={`food-art art-${index % 4}`}>{store.thumbnail_url ? <img src={mediaUrl(store.thumbnail_url)} alt="" loading="lazy" /> : <NavIcon type="store"/>}<small>LOCAL FLAVOR</small></div><div className="card-body"><span className="eyebrow">{store.market || 'MARKET PICK'}</span><h3>{store.name} <span className="arrow">↗</span></h3><p>{store.top_menu?.name}</p><strong><Money value={store.top_menu?.price ?? store.price_range?.min} /></strong></div></Link>
-}
-function Explore() {
-  const u = copy[useContext(Language)]
-  const lang = useContext(Language), t = text[lang], markets = useApi('/markets')
-  const [search, setSearch] = useState('')
-  const filtered = markets.data?.filter(m => `${m.name} ${m.name_ko} ${m.address}`.toLowerCase().includes(search.toLowerCase()))
-  return <><section className="hero"><div className="hero-copy"><span className="eyebrow">A LITTLE ADVENTURE, A LOCAL MARKET</span><h1>{t[4]}</h1><p>{t[5]}</p><Link className="button light" to="/shorts">{t[1]} ↗</Link></div><div className="hero-art" aria-hidden="true"><div className="awning"/><div className="shop-sign">{u.map}</div><div className="bowl"><NavIcon type="store"/></div><span className="stamp">FRESH<br/>LOCAL<br/>STORIES</span><p>{u.footer}</p></div></section><div className="section-title"><div><span className="eyebrow">EXPLORE THE NEIGHBORHOOD</span><h2>{t[6]}</h2></div><span className="round-icon">↘</span></div><label className="search">⌕ <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t[7]} aria-label={t[7]} /></label><State query={markets}><div className="market-grid">{filtered?.map((m, i) => <Link className="market-card" to={`/markets/${m.market_id}`} key={m.market_id}><div className={`market-visual art-${i % 4}`}><span className="market-number">0{i + 1}</span><span className="market-illustration" aria-hidden="true"><NavIcon type="map"/></span><span className="market-pill">{m.store_count} {t[8]}</span></div><div className="card-body"><h3>{m.name}<span className="arrow">↗</span></h3><p>{m.address}</p><div className="tags"><span>{m.open_cycle}</span>{m.has_parking && <span>{u.parking}</span>}{m.has_toilet && <span>{u.toilet}</span>}{m.vouchers.map(v => <span key={v}>{v}</span>)}</div></div></Link>)}</div>{!filtered?.length && <Empty />}</State></>
 }
 function Market() {
   const u = copy[useContext(Language)]
@@ -65,7 +59,7 @@ function Shell() {
   const viewLang = isMerchant ? 'ko' : lang, t = copy[viewLang]
   const customHeader = ['/contents', '/profile'].includes(location.pathname) || isLogin
   const storeRoute = /^\/stores\/[^/]+(?:\/order)?$/.test(location.pathname)
-  const designRoute = location.pathname === '/contents' || storeRoute
+  const designRoute = ['/contents', '/markets'].includes(location.pathname) || storeRoute
   const isFeed = location.pathname === '/' || location.pathname === '/shorts'
   function changeLanguage(next) {
     if (!['en', 'ko', 'zh'].includes(next)) return
@@ -77,7 +71,7 @@ function Shell() {
     {!designRoute && !isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools">{isMerchant ? <span className="merchant-badge">사장님 모드</span> : <LanguageSelect/>}</div></header>}
     <main className={designRoute ? 'design-route' : isFeed ? 'feed-main' : isLogin ? 'login-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
       <Route path="/" element={readRole() ? <FeedPage/> : <Navigate to="/login" replace/>}/><Route path="/shorts" element={<FeedPage/>}/>
-      <Route path="/markets" element={<Explore/>}/><Route path="/markets/:id" element={<Market/>}/>
+      <Route path="/markets" element={<MarketFeedPage/>}/><Route path="/markets/:id" element={<Market/>}/>
       <Route path="/stores/:id" element={<StoreMenuPage/>}/><Route path="/stores/:id/order" element={<OrderPreviewPage/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<ContentsFeedPage/>}/><Route path="/contents/:id" element={<Content/>}/>
       <Route path="/profile" element={<Profile/>}/><Route path="/login" element={<Login/>}/><Route path="/merchant/login" element={<MerchantLogin/>}/><Route path="/merchant/*" element={<Merchant/>}/>

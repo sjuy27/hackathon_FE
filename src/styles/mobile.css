@@ -180,3 +180,18 @@ main.feed-main { height: calc(100dvh - var(--mobile-nav-height) - env(safe-area-
 .pay-at-shop > div > span:last-child { color: var(--color-clay); text-align: right; }
 .order-back-button { width: 100%; }
 .order-ready { color: var(--color-clay); font-size: var(--text-body); padding: var(--mobile-gap); background: var(--color-selected); }
+
+/* market_menu_feed.png: vertically stacked market map cards. */
+.market-feed-page .mobile-search { margin: 0 0 calc(var(--spacing-unit) * 8); }
+.market-feed-list { display: grid; grid-template-columns: minmax(0,1fr); gap: var(--mobile-inset); }
+.market-feed-card { border: 1px solid var(--color-line); border-radius: var(--radius-card); overflow: hidden; background: var(--color-paper); }
+.market-card-media { position: relative; }
+.market-card-media > a:first-child { display: block; }
+.market-card-media .mobile-media { border-radius: 0; }
+.market-card-media .mobile-button { position: absolute; right: var(--mobile-inset); bottom: var(--mobile-inset); min-height: calc(var(--spacing-unit) * 9); font-size: var(--text-caption); }
+.market-card-details { padding: var(--mobile-inset); }
+.market-card-details h2 { margin: 0 0 calc(var(--spacing-unit) * 2); font-size: var(--text-heading); }
+.market-card-details p { margin: 0 0 var(--mobile-gap); font-size: var(--text-micro); color: var(--color-muted); }
+.market-card-tags { display: flex; gap: calc(var(--spacing-unit) * 2); overflow: hidden; }
+.market-card-tags span { min-width: 0; max-width: calc(var(--spacing-unit) * 22); padding: var(--spacing-unit) calc(var(--spacing-unit) * 2); border-radius: var(--spacing-unit); background: var(--color-warm); color: var(--color-muted); font-size: var(--text-micro); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.market-card-tags span:first-child, .market-card-tags span:last-child { flex-shrink: 0; }
