@@ -116,7 +116,7 @@ main.feed-main { height: calc(var(--screen-height) - var(--mobile-nav-height) - 
 .short-caption h2 { font-size: var(--text-body); font-weight: var(--weight-bold); margin-bottom: calc(var(--spacing-unit) * 2); }
 .short-caption p { font-size: var(--text-caption); line-height: var(--leading-body); color: var(--color-paper); margin: 0; }
 .short-subtitle { bottom: calc(var(--feed-card-height) + var(--mobile-inset) * 8); }
-.feed-store-card { position: absolute; z-index: 3; bottom: var(--mobile-gap); left: var(--mobile-gap); right: var(--mobile-gap); padding: var(--mobile-gap); background: var(--color-paper); color: var(--color-ink); border-radius: var(--radius-card); min-height: var(--feed-card-height); display: flex; flex-direction: column; justify-content: space-between; gap: var(--mobile-gap); }
+.feed-store-card { position: absolute; z-index: 3; bottom: var(--spacing-unit); left: var(--mobile-gap); right: var(--mobile-gap); padding: var(--mobile-gap); background: var(--color-paper); color: var(--color-ink); border-radius: var(--radius-card); min-height: var(--feed-card-height); display: flex; flex-direction: column; justify-content: space-between; gap: var(--mobile-gap); }
 .feed-store-info { display: flex; gap: var(--mobile-gap); align-items: center; min-width: 0; }
 .feed-store-info > div { flex: 1; min-width: 0; }
 .feed-store-info h3 { margin: 0 0 var(--spacing-unit); font-size: var(--text-body); line-height: var(--leading-tight); }
