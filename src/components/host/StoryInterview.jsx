@@ -18,7 +18,17 @@ function savedStory() {
   } catch { return null }
 }
 
+function forgetStory(interviewId) {
+  try {
+    const current = Number(sessionStorage.getItem('golmok-story'))
+    if (current && current !== interviewId) return
+    sessionStorage.removeItem('golmok-story')
+    sessionStorage.removeItem('golmok-story-context')
+  } catch { /* Browser storage is optional. */ }
+}
+
 function rememberStory(storeId, prompt, messages) {
+  if (prompt.done) { forgetStory(prompt.interview_id); return }
   try {
     sessionStorage.setItem('golmok-story',String(prompt.interview_id))
     sessionStorage.setItem('golmok-story-context',JSON.stringify({ storeId, prompt, messages }))
@@ -30,7 +40,7 @@ async function openStory(storeId, interviewId) {
   if (id) {
     let detail
     try { detail = await api(`${BASE}/${id}`) } catch (error) { if (error.status !== 404) throw error }
-    if (detail?.kind === 'story' && detail.store_id === storeId) {
+    if (detail?.kind === 'story' && detail.store_id === storeId && (detail.status === 'active' || interviewId)) {
       const turn = detail.turns.length, matches = cached?.id === id && cached.prompt?.turn === turn
       const prompt = { interview_id:id, turn, covered:detail.covered, done:detail.status !== 'active', say_ko:matches ? cached.prompt.say_ko : '이어서 들려주실 이야기가 있나요?', audio_url:matches ? cached.prompt.audio_url : null }
       const messages = matches ? cached.messages || [] : detail.turns.flatMap(item => [{ role:'ai', text:item.question }, { role:'me', text:item.transcript }])
@@ -38,6 +48,7 @@ async function openStory(storeId, interviewId) {
       rememberStory(storeId,prompt,messages)
       return { prompt, messages, script:detail.script_ko }
     }
+    forgetStory(id)
   }
   const prompt = await api(BASE,{method:'POST',body:{kind:'story',store_id:storeId}})
   const messages = [{role:'ai',text:prompt.say_ko}]
