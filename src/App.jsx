@@ -79,10 +79,10 @@ function Shell() {
       <NavLink to="/merchant/edit"><NavIcon type="store"/><span>가게 정보</span></NavLink>
       <NavLink to="/merchant/stats"><NavIcon type="stats"/><span>통계</span></NavLink>
       <NavLink to="/merchant/profile"><NavIcon type="profile"/><span>마이페이지</span></NavLink>
-    </nav>) : <nav className="mobile-nav" aria-label={t.map}>
+    </nav>) : <nav className="mobile-nav" aria-label={t.navigation}>
       <NavLink to="/shorts" end><NavIcon type="feed"/><span>{t.feed}</span></NavLink>
       <NavLink to="/contents"><NavIcon type="contents"/><span>{t.contents}</span></NavLink>
-      <NavLink to="/markets"><NavIcon type="map"/><span>{t.map}</span></NavLink>
+      <NavLink to="/markets"><NavIcon type="search"/><span>{t.search}</span></NavLink>
       <NavLink to="/profile"><NavIcon type="profile"/><span>{t.profile}</span></NavLink>
     </nav>}
   </SubtitleSettings.Provider></LanguageSettings.Provider></Language.Provider>
