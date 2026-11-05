@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://hack.220-66-233-75.nip.io/api/:path*"
+    },
+    {
+      "source": "/media/:path*",
+      "destination": "https://hack.220-66-233-75.nip.io/media/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

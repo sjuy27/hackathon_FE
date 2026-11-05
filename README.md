@@ -1,30 +1,53 @@
-# Hackathon FE
+﻿# 골목 GOLMOK
 
-React + Vite + Tailwind CSS 기반 프런트엔드 프로젝트입니다. JavaScript와 npm을 사용합니다.
+전통시장을 영상과 음식으로 탐색하는 모바일 중심 React 앱입니다. OpenAPI의 P0·P1 고객/상인 API를 연결했습니다.
 
-## 시작하기
+## 실행
 
-Node.js 24 LTS를 권장합니다.
+의존성이 설치된 상태에서 다음 명령을 실행합니다.
 
-```bash
-npm install
+```sh
 npm run dev
+npm run build
+npm run lint
 ```
 
-터미널에 표시되는 로컬 주소로 접속합니다.
+## 구현 범위
 
-## 명령어
+- `/`: 시장 검색, 시설·상품권·가게 수 표시
+- `/markets/:id`: OpenStreetMap 지도 위 실제 좌표의 가게 핀 선택, 대표 메뉴, 길찾기
+- `/shorts`, `/videos/:id`: 커서 기반 숏폼 피드, 영상 상세, 한국어·영어·중국어 VTT 자막
+- `/stores/:id`: 소개, 영업시간, 결제 수단, 메뉴·가격·매운 정도·먹는 방법, 수량 선택
+- 주문: `/orders/preview`로 한국어 주문 문장과 번역·합계를 생성하여 사장님에게 보여주는 카드 표시. 결제·주문 접수 API는 제공되지 않습니다.
+- `/contents`, `/contents/:id`: K-콘텐츠 → 음식 → 가게 연결, 직접 매칭이 없으면 유사 음식 추천
+- `/merchant`: 시장 선택 → 텍스트/녹음/음성 파일 답변 → 인식 내용 수정·확인/재답변 → 5단계 요약·영문 미리보기 → 가게 게시
+- 상인 영상: 사진 3~5장, 선택 메뉴·음성·자막 언어 → multipart 요청 → 2초 작업 폴링 → 완료 영상, 실패 재시도
+- 상인 관리: 가게 번호로 조회, 가게·결제 수단·메뉴 정보 수정 및 번역 재생성
 
-- `npm run dev`: 개발 서버 실행
-- `npm run build`: 프로덕션 빌드 (`dist/`)
-- `npm run preview`: 빌드 결과 로컬 미리보기
-- `npm run lint`: ESLint 검사
+React Router와 TanStack Query를 사용합니다. 로딩·빈 결과·API 오류 재시도, 모바일 하단 내비게이션, 주문 모달 키보드 초점 제어를 포함합니다. 언어, 등록 세션, 가게 번호, 영상 작업 번호를 로컬에 저장합니다. 녹음은 마이크 권한과 HTTPS 또는 localhost 환경이 필요하며 음성 파일과 텍스트도 사용할 수 있습니다.
 
-## 주요 파일
+## API 설정
 
-- `src/App.jsx`: 시작 화면
-- `src/main.jsx`: React 진입점
-- `src/index.css`: Tailwind CSS와 전역 스타일
-- `vite.config.js`: React 및 Tailwind Vite 플러그인 설정
+기본 API: `https://hack.220-66-233-75.nip.io/api/v1`
 
-환경 변수는 `.env.local`에 작성합니다. 클라이언트에 제공할 변수는 `VITE_` 접두사를 사용하며, 브라우저에 노출되므로 비밀 키를 넣지 않습니다.
+개발 모드에서는 Vite의 `/api`, `/media` 프록시를 사용합니다. API 서버가 특정 로컬 출처만 CORS 허용하기 때문에 로컬 주소에 따른 차단을 피하도록 구성했습니다. 프로덕션도 `/api/v1` 상대 경로를 사용하고, 루트 `vercel.json`에서 API 서버로 전달합니다. `/media`는 영상·썸네일·자막을 전달하며, 나머지 앱 경로는 `/index.html`로 연결됩니다.
+
+다른 서버를 사용할 때 `.env.local`에 아래 값을 설정합니다. 빌드 후 서비스하는 출처는 해당 API 서버의 CORS 허용 대상이어야 합니다.
+
+```dotenv
+VITE_API_BASE_URL=https://your-api.example.com/api/v1
+```
+
+상대 미디어 주소는 API 서버 출처를 기준으로 해석합니다. API 계약은 `openapi.json`에 보관했습니다. Vercel의 SPA fallback 설정이 포함되어 중첩 경로에서도 새로고침이 가능합니다.
+
+## 검증
+
+- `npm run build`: 통과
+- `npm run lint`: 오류·경고 없이 통과
+- 390px 모바일 Edge: 실제 API 시장 → 가게 → 메뉴 2개 → 한국어 주문 카드/8,000원 확인
+- 실제 API: 숏폼·자막 표시, 콘텐츠의 유사 음식/가게 연결, 영어 전환, 동영상·썸네일·자막 파일 HTTP 200 확인
+- 사장님 화면: 브라우저 모의 API로 5단계 답변·확인 → 요약 → 게시 → 사진 multipart 업로드 → 2초 폴링 → 영상 완료, 가게·메뉴 PATCH 검증
+- 상인 검증은 실제 서버에 가게 등록·수정·영상 생성 데이터를 남기지 않았습니다. 실제 AI 생성 결과와 마이크 장치 녹음은 별도 확인 대상입니다.
+
+화면은 데스크톱에서도 최대 390px로 가운데 정렬되며, 더 작은 화면에서는 가용 폭에 맞춰 줄어듭니다. 디자인 참고 이미지와 환경 파일은 Git에서 제외합니다.
+
