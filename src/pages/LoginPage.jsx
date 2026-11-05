@@ -14,7 +14,7 @@ const landingCopy = {
 
 export default function LoginPage() {
   const lang = useContext(Language), t = landingCopy[lang], navigate = useNavigate()
-  function guest() { saveRole('guest'); navigate('/', { replace: true }) }
+  function guest() { saveRole('guest'); navigate('/shorts', { replace: true }) }
   // 로그인 상태를 유지한 사장님은 로그인 화면을 건너뛴다.
   function merchant() { navigate(readRole() === 'merchant' ? '/merchant' : '/merchant/login') }
   return <div className="mobile-page login-landing">
@@ -43,7 +43,7 @@ export function MerchantLoginPage() {
     navigate('/merchant', { replace: true })
   }
   function register() { loginMerchant(DEMO_STORE_ID, keep, phone); navigate('/merchant/register', { replace: true }) }
-  function guest() { saveRole('guest'); navigate('/', { replace: true }) }
+  function guest() { saveRole('guest'); navigate('/shorts', { replace: true }) }
   return <div className="mobile-page merchant-login-page" lang="ko">
     <span className="merchant-login-icon"><NavIcon type="store"/></span>
     <h1>사장님 로그인</h1>

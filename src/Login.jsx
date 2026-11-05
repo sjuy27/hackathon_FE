@@ -13,7 +13,7 @@ const loginCopy = {
 // 첫 화면: 게스트 / 사장님 고르기
 export function Login() {
   const lang = useContext(Language), t = loginCopy[lang], navigate = useNavigate()
-  function guest() { saveRole('guest'); navigate('/', { replace: true }) }
+  function guest() { saveRole('guest'); navigate('/shorts', { replace: true }) }
   return <div className="login-page">
     <div className="login-top"><span className="brand"><span className="brand-icon">◒</span> 골목</span><LanguageSelect/></div>
     <div className="login-hero"><h1>{t.welcome}</h1><p>{t.intro}</p></div>
