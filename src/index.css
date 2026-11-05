@@ -422,3 +422,31 @@ main.login-main { margin: 0; padding: 0; min-height: 0; }
 .merchant-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 18px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
 .merchant-bar span { font-size: 16px; font-weight: 800; }
 .merchant-bar .button { min-height: 36px; padding: 6px 14px; font-size: 13px; }
+
+/* 프론트 전달 사항(11/6) 반영: 구글 지도, 이모지 대신 아이콘, 말로 가게 등록 대화 */
+.map-canvas.google .map-pin { position: static; transform: none; display: grid; place-items: center; cursor: pointer; }
+.map-pin:hover { background: #f5eae3; }
+.map-pin.selected:hover { background: var(--primary); }
+.bowl svg, .market-illustration svg, .food-art > svg { width: 64px; height: 64px; color: var(--primary); opacity: .75; }
+.spicy { letter-spacing: 1px; color: var(--primary); }
+.catalog-image { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; display: block; flex-shrink: 0; background: #e8e8e8; }
+.chat { display: grid; gap: 10px; margin: 18px 0; }
+.bubble { max-width: 88%; padding: 12px 14px; border-radius: 16px; font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.bubble.bot { justify-self: start; background: #f4f0ed; border-top-left-radius: 4px; }
+.bubble.bot strong { display: block; }
+.bubble.bot small { display: block; margin-top: 4px; color: var(--muted); }
+.bubble.me { justify-self: end; background: var(--primary); color: #fff; border-top-right-radius: 4px; white-space: pre-wrap; }
+.bubble.confirm { max-width: 100%; width: 100%; display: grid; gap: 12px; background: #fff; border: 1px solid var(--line); }
+.bubble.confirm label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.bubble.confirm fieldset { margin: 0; }
+.bubble.thinking { color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: dot 1.2s infinite ease-in-out; }
+.dots i:nth-child(2) { animation-delay: .15s; }
+.dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+.check-badge { display: inline-block; margin: 0 6px; padding: 2px 7px; border-radius: 10px; background: #fbe9e1; color: var(--primary); font-size: 11px; font-weight: 700; vertical-align: middle; }
+.needs-check { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.needs-check .check-badge { margin-left: 0; }
+.button.listening { background: var(--primary); color: #fff; }
+.listening-hint { font-size: 12px; color: var(--primary); font-weight: 700; }
