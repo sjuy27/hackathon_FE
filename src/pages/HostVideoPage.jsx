@@ -7,13 +7,14 @@ import { ErrorMessage, State, VideoPlayer } from '../shared'
 import { NavIcon } from '../Profile'
 import { Button, MediaSlot, PageHeader } from '../components/MobileUI'
 import SpeechAnswer from '../components/host/SpeechAnswer'
-import { remember, saved } from '../components/host/host-model'
 
 function scriptLines(script) { return script.split(/\n|(?<=[.!?。！？])\s+/).map(line=>line.trim()).filter(Boolean).length }
 export default function HostVideoPage({ store }) {
   const storeId = store.store_id
-  const [photos,setPhotos] = useState([]), [script,setScript] = useState(''), [audio,setAudio] = useState(null), [langs,setLangs] = useState(['en','zh']), [menu,setMenu] = useState(''), [jobId,setJobId] = useState(()=>saved(`golmok-job-${storeId}`)), [slow,setSlow] = useState(false), [capturing,setCapturing] = useState(false), [message,setMessage] = useState('')
+  const [photos,setPhotos] = useState([]), [script,setScript] = useState(''), [audio,setAudio] = useState(null), [langs,setLangs] = useState(['en','zh']), [menu,setMenu] = useState(''), [jobId,setJobId] = useState(null), [slow,setSlow] = useState(false), [capturing,setCapturing] = useState(false), [message,setMessage] = useState('')
   const urls = useRef(new Set()), creating = useRef(false), spoken = useRef(null), scriptBox = useRef(null)
+  // 이전 버전에서 저장한 영상 작업을 복원하지 않고 새로 시작한다.
+  useEffect(()=>{try{localStorage.removeItem(`golmok-job-${storeId}`)}catch{/* Optional storage. */}},[storeId])
   useEffect(()=>{const ownedUrls=urls.current;return()=>{ownedUrls.forEach(url=>URL.revokeObjectURL(url));spoken.current?.()}},[])
   const create = useMutation({mutationFn:(payload={})=>{
     if(photos.length<1 || photos.length>5)throw new Error('사진을 1~5장 선택해주세요.')
@@ -24,7 +25,7 @@ export default function HostVideoPage({ store }) {
     if(menu)body.append('menu_id',menu)
     langs.forEach(lang=>body.append('langs',lang))
     return api(`/merchant/stores/${storeId}/videos`,{method:'POST',body})
-  },onSuccess:data=>{setSlow(false);setJobId(data.job_id);remember(`golmok-job-${storeId}`,data.job_id)},onSettled:()=>{creating.current=false}})
+  },onSuccess:data=>{setSlow(false);setJobId(data.job_id)},onSettled:()=>{creating.current=false}})
   const job = useQuery({queryKey:['video-job',jobId],enabled:!!jobId,queryFn:()=>api(`/merchant/videos/jobs/${jobId}`),refetchInterval:query=>query.state.status==='error'?false:!query.state.data||['queued','processing'].includes(query.state.data.status)?2000:false})
   const status=job.data?.status,busy=create.isPending||!!jobId&&(!job.data||['queued','processing'].includes(status))
   useEffect(()=>{if(!busy)return;const timer=setTimeout(()=>setSlow(true),30000);return()=>clearTimeout(timer)},[busy,jobId])
@@ -41,7 +42,7 @@ export default function HostVideoPage({ store }) {
     setMessage('');setPhotos(previous=>[...previous,...additions])
   }
   function removePhoto(url) {URL.revokeObjectURL(url);urls.current.delete(url);setPhotos(previous=>previous.filter(photo=>photo.url!==url))}
-  function resetJob(){setJobId(null);setSlow(false);remember(`golmok-job-${storeId}`,'');create.reset()}
+  function resetJob(){setJobId(null);setSlow(false);create.reset()}
   const lines=scriptLines(script)
   return <div className="mobile-page host-page host-video-page" lang="ko"><PageHeader title="영상 만들기" back="/merchant" showLanguage={false}/><form id="host-create-video" onSubmit={event=>{event.preventDefault();generate()}}>
     <label className="host-video-menu">어떤 메뉴 영상인가요?<select value={menu} disabled={busy} onChange={event=>setMenu(event.target.value)}><option value="">가게 전체 소개</option>{store.menus.map(item=><option key={item.menu_id} value={item.menu_id}>{item.name_ko||item.name}</option>)}</select></label>

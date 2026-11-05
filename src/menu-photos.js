@@ -3,7 +3,7 @@ const names = {
   김밥: 'gimbap', 라면: 'ramyeon', 국밥: 'gukbap', 순대국밥: 'gukbap',
   비빔밥: 'bibimbap', 나물: 'namul', 나물반찬: 'namul', 달고나: 'dalgona',
   라볶이: 'rabokki', 떡볶이: 'tteokbokki', 순대: 'sundae', 꽈배기: 'kkwabaegi', 호떡: 'hotteok',
-  기름떡볶이: 'oil-tteokbokki', 간장떡볶이: 'oil-tteokbokki', 어묵: 'eomuk',
+  기름떡볶이: 'oil-tteokbokki', 간장떡볶이: 'soy-tteokbokki', 어묵: 'eomuk',
   찹쌀도넛: 'chapssal-doughnuts', 식혜: 'sikhye', 모둠튀김: 'twigim', 빈대떡: 'bindaetteok', 고기완자: 'wanja',
 }
 
@@ -11,6 +11,12 @@ const names = {
 export function menuPhoto(menu) {
   const name = (menu?.name_ko || menu?.food_ko || '').replace(/\s/g, '')
   return photos[`./assets/foods/${names[name]}.jpg`]
+}
+
+// 구버전 API의 공용 기름떡볶이 URL도 메뉴별 사진으로 구분한다.
+export function menuImage(menu) {
+  return /(?:^|\/)oil-tteokbokki\.jpg(?:[?#]|$)/.test(menu?.image_url || '')
+    ? menuPhoto(menu) || menu.image_url : menu?.image_url
 }
 
 export function marketPhoto(market) {
