@@ -6,7 +6,7 @@ export default function PagePosition() {
   const { pathname, hash } = useLocation(), lang = useContext(Language)
   useEffect(() => {
     document.documentElement.lang = lang
-    if (!hash) { window.scrollTo(0, 0); return }
+    if (!hash) { window.scrollTo(0, 0); document.getElementById('root')?.scrollTo(0, 0); return }
     let observer
     const target = () => {
       const element = document.getElementById(hash.slice(1))

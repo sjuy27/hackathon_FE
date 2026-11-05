@@ -7,7 +7,10 @@ export default function Dialog({ label, onClose, children }) {
   useEffect(() => {
     const previous = document.activeElement
     const overflow = document.body.style.overflow
+    const root = document.getElementById('root')
+    const rootOverflow = root?.style.overflow
     document.body.style.overflow = 'hidden'
+    if (root) root.style.overflow = 'hidden'
     ref.current.querySelector('button')?.focus()
     function keydown(e) {
       if (e.key === 'Escape') close.current()
@@ -18,7 +21,7 @@ export default function Dialog({ label, onClose, children }) {
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus() }
     }
     document.addEventListener('keydown', keydown)
-    return () => { document.removeEventListener('keydown', keydown); document.body.style.overflow = overflow; previous?.focus() }
+    return () => { document.removeEventListener('keydown', keydown); document.body.style.overflow = overflow; if (root) root.style.overflow = rootOverflow; previous?.focus() }
   }, [])
   return <div className="modal-backdrop"><section className="order-modal" role="dialog" aria-modal="true" aria-label={label} ref={ref}>{children}</section></div>
 }
