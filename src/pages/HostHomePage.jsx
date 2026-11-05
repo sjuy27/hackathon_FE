@@ -1,19 +1,11 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { api } from '../api'
 import { Button, PageHeader } from '../components/MobileUI'
 import HostActionCard from '../components/host/HostActionCard'
-import { saved, STEPS } from '../components/host/host-model'
+import useStoreProgress from '../components/host/use-store-progress'
 
-const fields = ['가게 이름', '메뉴', '결제 방법', '영업시간', '가게 이야기']
 export default function HostHomePage({ store, statistics = false }) {
-  const [sessionId] = useState(() => saved('golmok-session'))
-  const summary = useQuery({ queryKey: ['onboarding-summary',sessionId], enabled: !!sessionId, queryFn: () => api(`/merchant/onboarding/sessions/${sessionId}/summary`) })
-  const values = [store.name_ko || store.name, store.menus?.length, store.payment?.length, store.hours, store.story_ko || store.story]
-  const completed = summary.data ? STEPS.filter(step => summary.data.steps?.[step]).length : values.filter(Boolean).length
-  const missing = summary.data ? fields.filter((_,index) => !summary.data.steps?.[['store_name','menus','payment','hours','story'][index]]) : fields.filter((_,index) => !values[index])
+  const { completed, missing } = useStoreProgress(store)
   const metrics = <div className="host-metrics"><div><span>이번 주 외국인 조회</span><strong aria-label="집계 준비 중">—</strong></div><div><span>주문 화면 열림</span><strong aria-label="집계 준비 중">—</strong></div></div>
-  if (statistics) return <div className="mobile-page host-page"><PageHeader title="통계" back="/merchant" showLanguage={false}/>{metrics}<p className="host-muted">통계 서비스 준비 중입니다.</p></div>
+  if (statistics) return <div className="mobile-page host-page host-stats-page"><PageHeader title="통계" back="/merchant" showLanguage={false}/>{metrics}<p className="host-muted">통계 서비스 준비 중입니다.</p></div>
   return <div className="mobile-page host-page host-home-page">
     <div className="host-home-top"><span className="host-mode">사장님 모드</span><Button to="/shorts">손님 화면 보기</Button></div>
     <h1>{store.name_ko || store.name} 사장님, 안녕하세요</h1><p className="host-home-intro">오늘 할 일을 골라 주세요.</p>

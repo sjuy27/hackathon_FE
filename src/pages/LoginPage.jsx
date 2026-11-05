@@ -39,10 +39,10 @@ export function MerchantLoginPage() {
     event.preventDefault()
     if (!/^01\d-\d{3,4}-\d{4}$/.test(phone)) return setMessage('휴대폰 번호를 다시 확인해 주세요.')
     if (!password) return setMessage('비밀번호를 입력해 주세요.')
-    loginMerchant(DEMO_STORE_ID, keep)
+    loginMerchant(DEMO_STORE_ID, keep, phone)
     navigate('/merchant', { replace: true })
   }
-  function register() { loginMerchant(DEMO_STORE_ID, keep); navigate('/merchant/register', { replace: true }) }
+  function register() { loginMerchant(DEMO_STORE_ID, keep, phone); navigate('/merchant/register', { replace: true }) }
   function guest() { saveRole('guest'); navigate('/', { replace: true }) }
   return <div className="mobile-page merchant-login-page" lang="ko">
     <span className="merchant-login-icon"><NavIcon type="store"/></span>
