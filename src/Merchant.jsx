@@ -262,10 +262,14 @@ function Onboarding({ storeId, onPublished }) {
 function scriptSeconds(script) { return script.split(/\n|(?<=[.!?。！？])\s+/).map(s => s.trim()).filter(Boolean).length * 5 }
 const SLOW_AFTER_MS = 30000
 function GenerateVideo({ storeId, store }) {
-  const [photos, setPhotos] = useState([]), [script, setScript] = useState(''), [audio, setAudio] = useState(null), [langs, setLangs] = useState(['en', 'zh']), [menu, setMenu] = useState(''), [jobId, setJobId] = useState(() => saved(`golmok-job-${storeId}`)), [slow, setSlow] = useState(false), [scriptDone, setScriptDone] = useState(false), [capturingScript, setCapturingScript] = useState(false), [voiceEnabled, setVoiceEnabled] = useState(true), [scriptMessage, setScriptMessage] = useState('')
+  const [photos, setPhotos] = useState([]), [script, setScript] = useState(''), [audio, setAudio] = useState(null), [langs, setLangs] = useState(['en', 'zh']), [menu, setMenu] = useState(''), [jobId, setJobId] = useState(null), [slow, setSlow] = useState(false), [scriptDone, setScriptDone] = useState(false), [capturingScript, setCapturingScript] = useState(false), [voiceEnabled, setVoiceEnabled] = useState(true), [scriptMessage, setScriptMessage] = useState('')
   const scriptBox = useRef(null), creating = useRef(false), spokenStatus = useRef(null)
-  useEffect(() => () => spokenStatus.current?.(), [])
-  const create = useMutation({ mutationFn: (payload = {}) => { const body = new FormData(); photos.forEach(p => body.append('photos', p)); const text = payload.text ?? script, recording = payload.audio ?? (payload.text == null ? audio : null); if (recording) body.append('audio', recording, 'blob'); else if (text.trim()) body.append('script', text.trim()); if (menu) body.append('menu_id', menu); langs.forEach(l => body.append('langs', l)); return api(`/merchant/stores/${storeId}/videos`, { method: 'POST', body }) }, onSuccess: d => { setSlow(false); setJobId(d.job_id); remember(`golmok-job-${storeId}`, d.job_id) }, onSettled: () => { creating.current = false } })
+  // 이전 버전에서 저장한 미리보기 작업은 다시 열지 않는다.
+  useEffect(() => {
+    try { localStorage.removeItem(`golmok-job-${storeId}`) } catch { /* Optional storage. */ }
+    return () => spokenStatus.current?.()
+  }, [storeId])
+  const create = useMutation({ mutationFn: (payload = {}) => { const body = new FormData(); photos.forEach(p => body.append('photos', p)); const text = payload.text ?? script, recording = payload.audio ?? (payload.text == null ? audio : null); if (recording) body.append('audio', recording, 'blob'); else if (text.trim()) body.append('script', text.trim()); if (menu) body.append('menu_id', menu); langs.forEach(l => body.append('langs', l)); return api(`/merchant/stores/${storeId}/videos`, { method: 'POST', body }) }, onSuccess: d => { setSlow(false); setJobId(d.job_id) }, onSettled: () => { creating.current = false } })
   const job = useQuery({ queryKey: ['video-job', jobId], enabled: !!jobId, queryFn: () => api(`/merchant/videos/jobs/${jobId}`), refetchInterval: q => ['queued', 'processing'].includes(q.state.data?.status) || !q.state.data ? 2000 : false })
   const status = job.data?.status, busy = !!jobId && (!job.data || ['queued', 'processing'].includes(status))
   // 30초 안에 끝나지 않으면 기존 영상(대체 영상)을 먼저 보여준다. 실패하면 서버가 준 fallback_video_id 를 쓴다.
@@ -277,7 +281,7 @@ function GenerateVideo({ storeId, store }) {
   const fallbackId = status === 'failed' ? job.data.fallback_video_id : busy && slow ? store.videos[0]?.video_id : null
   const result = useApi(`/videos/${job.data?.video_id}`, !!job.data?.video_id && status === 'done')
   const fallback = useApi(`/videos/${fallbackId}`, !!fallbackId)
-  function resetJob() { setJobId(null); setSlow(false); remember(`golmok-job-${storeId}`, '') }
+  function resetJob() { setJobId(null); setSlow(false) }
   function generate(payload = {}) {
     if (creating.current || busy) return
     creating.current = true; create.mutate(payload)
