@@ -394,3 +394,9 @@ select.language-pill { width: 43px; height: 32px; flex-shrink: 0; appearance: no
 @media(max-width:360px) { .catalog-filters { gap: 4px; } .catalog-filters button { padding-inline: 9px; } .short-caption { bottom: 215px; } .shop-facts span { font-size: 8px; } }
 .catalog-card { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; }
 .title-placeholder { flex-shrink: 0; }
+
+/* PC 브라우저: 확대·축소해도 폰 비율(390×844)이 유지되도록 앱 너비를 창 높이에 맞춘다.
+   폰(터치, 좁은 화면)에서는 위의 390px 규칙을 그대로 쓴다. */
+@media (min-width: 500px) and (hover: hover) {
+  :root { --app-width: min(100vw, calc(100dvh * 390 / 844)); }
+}
