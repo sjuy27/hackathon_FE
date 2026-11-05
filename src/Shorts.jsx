@@ -1,4 +1,4 @@
-﻿import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { api, mediaUrl } from './api'
@@ -14,7 +14,7 @@ function Clip({ item }) {
   const [paused, setPaused] = useState(true), [muted, setMuted] = useState(true), [failed, setFailed] = useState(false), [active, setActive] = useState(false)
   const [saved, setSaved] = useState(() => readIds('golmok-saved-videos').includes(item.video_id))
   const [liked, setLiked] = useState(() => readIds('golmok-liked-videos').includes(item.video_id))
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState(''), [cueText, setCueText] = useState('')
   const store = item.store, detail = useApi(`/stores/${store.store_id}`, active)
   useEffect(() => {
     const player = video.current
@@ -27,9 +27,31 @@ function Clip({ item }) {
   }, [])
   useEffect(() => {
     const player = video.current
-    function selectTrack() { for (const track of player.textTracks) track.mode = track.language === subtitles.lang ? 'showing' : 'disabled' }
-    selectTrack(); player.addEventListener('loadedmetadata', selectTrack)
-    return () => player.removeEventListener('loadedmetadata', selectTrack)
+    let selected = null, disposed = false
+    function syncCues() {
+      if (disposed) return
+      setCueText(Array.from(selected?.activeCues || [], cue => cue.text).join('\n'))
+    }
+    function selectTrack() {
+      selected?.removeEventListener('cuechange', syncCues)
+      selected = null
+      for (const track of player.textTracks) {
+        const chosen = track.language === subtitles.lang
+        track.mode = chosen ? 'hidden' : 'disabled'
+        if (chosen) selected = track
+      }
+      selected?.addEventListener('cuechange', syncCues)
+      syncCues()
+    }
+    selectTrack()
+    player.addEventListener('loadedmetadata', selectTrack)
+    player.textTracks.addEventListener('addtrack', selectTrack)
+    return () => {
+      disposed = true
+      selected?.removeEventListener('cuechange', syncCues)
+      player.removeEventListener('loadedmetadata', selectTrack)
+      player.textTracks.removeEventListener('addtrack', selectTrack)
+    }
   }, [subtitles.lang])
   function toggle(key, value, setter) {
     writeIds(key, value ? readIds(key).filter(id => id !== item.video_id) : [item.video_id, ...readIds(key)].slice(0, 50))
@@ -44,14 +66,14 @@ function Clip({ item }) {
   }
   return <article className="short-slide" aria-label={store.name}>
     <video ref={video} className="short-video" src={mediaUrl(item.video_url)} poster={mediaUrl(item.thumbnail_url)} playsInline loop muted={muted} preload="metadata" crossOrigin="anonymous" onPlay={() => setPaused(false)} onPause={() => setPaused(true)} onError={() => setFailed(true)}>
-      {Object.entries(item.subtitles || {}).map(([code, url]) => <track key={code} kind="subtitles" src={mediaUrl(url)} srcLang={code} label={{ en: 'English', ko: '한국어', zh: '中文' }[code] || code} default={code === subtitles.lang}/>)}
-    </video><div className="short-shade"/>
+      {Object.entries(item.subtitles || {}).map(([code, url]) => <track key={code} kind="subtitles" src={mediaUrl(url)} srcLang={code} label={{ en: 'English', ko: '한국어', zh: '中文' }[code] || code}/>)}
+    </video><div className="short-shade"/>{cueText && <div className="short-subtitle" aria-live="off">{cueText}</div>}
     {failed ? <p className="short-video-error" role="status">{t.videoError}</p> : <button className={`short-play ${paused ? 'is-paused' : ''}`} aria-label={paused ? t.play : t.pause} onClick={() => paused ? video.current.play().catch(() => {}) : video.current.pause()}>{paused ? '▷' : 'Ⅱ'}</button>}
     <button className="short-audio" aria-label={muted ? t.unmute : t.mute} onClick={() => setMuted(v => !v)}>{muted ? '♫ ×' : '♫'}</button>
     <div className="short-tools"><button aria-label={liked ? d.liked : d.like} aria-pressed={liked} onClick={() => toggle('golmok-liked-videos', liked, setLiked)}><NavIcon type="like"/></button><button aria-label={saved ? d.saved : d.save} aria-pressed={saved} onClick={() => toggle('golmok-saved-videos', saved, setSaved)}><NavIcon type="save"/><span>{saved ? d.saved : d.save}</span></button><button onClick={share}><NavIcon type="share"/><span>{d.share}</span></button></div>
     {message && <p className="share-message" role="status">{message}</p>}
-    <div className="short-caption"><h2>{store.name} · {store.market}</h2><p>{detail.data?.story || store.top_menu?.name}</p>{item.subtitles?.[subtitles.lang] && <span className="subtitle-badge">{subtitles.lang.toUpperCase()} · {d.subtitle}</span>}</div>
-    <div className="short-shop"><div className="short-shop-info"><div className="shop-thumbnail">{item.thumbnail_url ? <img src={mediaUrl(item.thumbnail_url)} alt=""/> : <NavIcon type="map"/>}</div><div><h3>{store.name}</h3><span>⌖ {store.market}</span><div className="shop-facts">{store.payment.slice(0, 2).map(p => <span key={p}>{d[p] || p}</span>)}{store.top_menu && <span>{store.top_menu.spicy_level === 0 ? t.mild : `${d.spicy} ${store.top_menu.spicy_level}`}</span>}<span><Money value={store.top_menu?.price}/></span></div></div></div><div className="short-shop-actions"><Link className="shop-order" to={`/stores/${store.store_id}#menu`}>{d.menuOrder}</Link><a className="shop-visit" href={mediaUrl(store.directions_url)} target="_blank" rel="noreferrer">{d.directions}</a></div></div>
+    <div className="short-caption"><h2>{store.name} · {store.market}</h2><p>{detail.data?.story || store.top_menu?.name}</p></div>
+    <div className="short-shop"><div className="short-shop-info"><div className="shop-thumbnail">{item.thumbnail_url ? <img src={mediaUrl(item.thumbnail_url)} alt=""/> : <NavIcon type="map"/>}</div><div><h3>{store.name}</h3><p className="shop-meta"><span>{store.market}</span><span className="shop-facts"><Money value={store.top_menu?.price}/></span></p></div></div><div className="short-shop-actions"><Link className="shop-order" to={`/stores/${store.store_id}#menu`}>{d.menuOrder}</Link><a className="shop-visit" href={mediaUrl(store.directions_url)} target="_blank" rel="noreferrer" aria-label={d.directions}><NavIcon type="map"/></a></div></div>
   </article>
 }
 export default function Shorts() {
