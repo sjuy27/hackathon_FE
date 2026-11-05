@@ -32,9 +32,9 @@
 .host-home-intro { color: var(--color-muted); font-size: var(--text-heading); margin-bottom: var(--mobile-inset); }
 .host-progress-card { border: 1px solid var(--color-line); border-radius: var(--radius-card); padding: var(--mobile-inset); }
 .host-progress-card > div { display: flex; align-items: center; justify-content: space-between; gap: var(--mobile-gap); font-size: var(--text-heading); }
-.host-progress-card progress { display: block; width: 100%; height: calc(var(--spacing-unit) * 3); border: 0; border-radius: var(--spacing-unit); overflow: hidden; margin: var(--mobile-gap) 0 calc(var(--spacing-unit) * 2); background: var(--color-placeholder); accent-color: var(--color-clay); }
-.host-progress-card progress::-webkit-progress-bar { background: var(--color-placeholder); }
-.host-progress-card progress::-webkit-progress-value { background: var(--color-clay); }
+.host-progress-card progress, .host-stats-flow progress { display: block; width: 100%; height: calc(var(--spacing-unit) * 3); border: 0; border-radius: var(--spacing-unit); overflow: hidden; margin: var(--mobile-gap) 0 calc(var(--spacing-unit) * 2); background: var(--color-placeholder); accent-color: var(--color-clay); }
+.host-progress-card progress::-webkit-progress-bar, .host-stats-flow progress::-webkit-progress-bar { background: var(--color-placeholder); }
+.host-progress-card progress::-webkit-progress-value, .host-stats-flow progress::-webkit-progress-value { background: var(--color-clay); }
 .host-progress-card p { font-size: var(--text-caption); color: var(--color-muted); margin: 0; }
 .host-home-actions { display: grid; grid-template-columns: minmax(0,1fr); gap: var(--host-card-gap); margin: calc(var(--spacing-unit) * 8) 0; }
 .host-action-card { display: flex; justify-content: flex-start; text-align: left; padding: var(--mobile-inset); gap: var(--mobile-inset); min-height: calc(var(--spacing-unit) * 22); }
@@ -176,3 +176,6 @@
 .host-profile-actions .host-profile-logout { color: var(--color-clay); }
 .host-contact-number { font-size: var(--text-heading); font-weight: var(--weight-bold); }
 @media (max-width: 359px) { :root { --host-photo-size: 72px; } .host-home-intro { font-size: var(--text-body); } .host-action-card small { font-size: var(--text-caption); } }
+
+.host-stats-flow { display: grid; gap: var(--mobile-gap); }
+.host-stats-flow > div > div { display: flex; justify-content: space-between; gap: var(--mobile-gap); font-size: var(--text-body); }

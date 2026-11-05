@@ -1,4 +1,5 @@
 export const VOICE_SILENCE_MS = 2000
+export const CONFIRM_WAIT_MS = 2500
 
 // 질문 읽기와 마이크 수집을 순서대로 실행한다. 취소된 읽기는 다음 수집을 시작하지 않는다.
 export function speakQuestion(text, onEnd, onError = () => {}) {
@@ -20,6 +21,22 @@ export function speakQuestion(text, onEnd, onError = () => {}) {
   utterance.onerror = () => finish(false)
   synth.cancel(); synth.speak(utterance)
   return () => { active = false; clearTimeout(timeout); utterance.onend = null; utterance.onerror = null; synth.cancel() }
+}
+
+// 안내와 질문을 차례로 읽는다. 취소하면 다음 문장과 듣기를 시작하지 않는다.
+export function speakSequence(texts, onEnd, onError = () => {}) {
+  const queue = texts.filter(text => typeof text === 'string' && text.trim())
+  let active = true, index = 0, cancelCurrent = null
+  function next() {
+    if (!active) return
+    if (index === queue.length) { active = false; onEnd?.(); return }
+    cancelCurrent = speakQuestion(queue[index++], () => queueMicrotask(next), message => {
+      if (!active) return
+      active = false; onError(message)
+    })
+  }
+  next()
+  return () => { active = false; cancelCurrent?.() }
 }
 
 // 받아쓰기를 쓸 수 없으면 기기의 소리 크기를 확인해 녹음을 마친다.

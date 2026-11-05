@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavIcon } from '../../Profile'
 import { Button } from '../MobileUI'
-import { confirmationChoice, speakQuestion, watchSilence, VOICE_SILENCE_MS } from '../../merchant-voice'
+import { confirmationChoice, speakSequence, watchSilence, VOICE_SILENCE_MS } from '../../merchant-voice'
 import useHostPreferences from './use-host-preferences'
 const SpeechRecognition = typeof window === 'undefined' ? null : window.SpeechRecognition || window.webkitSpeechRecognition
 
@@ -57,7 +57,7 @@ export function VoiceRecorder({ label, maxSeconds, onDone, disabled, onRecording
 }
 
 // 말하는 대로 글자 띄우기. 종료 이벤트에서 편집을 포함한 최신 답변을 한 번만 보낸다.
-export default function SpeechAnswer({ value, onChange, onAutoSubmit, onAudio, onManualInput, onRecordingChange, prompt = '', autoStart = false, onEnableVoice, maxSeconds, maxLength = 2000, disabled = false, presentation = 'default' }) {
+export default function SpeechAnswer({ value, onChange, onAutoSubmit, onAudio, onManualInput, onRecordingChange, prompt = '', intro = '', onIntroDone, autoStart = false, onEnableVoice, maxSeconds, maxLength = 2000, disabled = false, presentation = 'default' }) {
   const { readQuestions } = useHostPreferences()
   const rec = useRef(null), base = useRef(''), from = useRef(0), seen = useRef(0), latestText = useRef(value)
   const silence = useRef(null), limit = useRef(null), submitted = useRef(false), stopping = useRef(false), cancelled = useRef(false), spoken = useRef(null), startedPrompt = useRef(null)
@@ -130,9 +130,9 @@ export default function SpeechAnswer({ value, onChange, onAutoSubmit, onAudio, o
   }
   function begin() {
     pause(); cancelled.current = false; submitted.current = false; startedPrompt.current = prompt; onEnableVoice?.(); setError('')
-    if (!prompt || !readQuestions) { startListening(); return }
+    if ((!intro && !prompt) || !readQuestions) { startListening(); return }
     setSpeaking(true); onRecordingChange?.(true)
-    spoken.current = speakQuestion(prompt, () => { spoken.current = null; setSpeaking(false); startListening() }, message => { setSpeaking(false); onRecordingChange?.(false); setError(message) })
+    spoken.current = speakSequence([intro, prompt], () => { spoken.current = null; if (intro) onIntroDone?.(); setSpeaking(false); startListening() }, message => { setSpeaking(false); onRecordingChange?.(false); setError(message) })
   }
   useEffect(() => { controls.current = { begin, pause } })
   useEffect(() => {
