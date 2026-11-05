@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { Language } from '../data'
 import { DEMO_STORE_ID, loginMerchant, readRole, saveRole } from '../auth'
 import { LanguageSelect, NavIcon } from '../Profile'
+import logo from '../assets/golmok-logo.png'
 
-// mvpLen.png 왼쪽: 첫 화면(게스트로 둘러보기 / 사장님 로그인)
+// lending.png: 첫 화면(게스트로 둘러보기 / 사장님 로그인)
 const landingCopy = {
   en: { title: 'Every alley,\na new Flavor.', intro: "Watch short videos from seoul's traditional markets, then order in Korean with one tap.", start: 'Start exploring' },
   ko: { title: '골목마다,\n새로운 맛.', intro: '서울 전통시장의 숏폼을 보고, 한 번의 탭으로 한국어 주문까지.', start: '둘러보기 시작' },
@@ -17,7 +18,7 @@ export default function LoginPage() {
   // 로그인 상태를 유지한 사장님은 로그인 화면을 건너뛴다.
   function merchant() { navigate(readRole() === 'merchant' ? '/merchant' : '/merchant/login') }
   return <div className="mobile-page login-landing">
-    <div className="login-landing-top"><span className="login-logo">골목</span><LanguageSelect/></div>
+    <div className="login-landing-top"><img className="login-logo" src={logo} alt="골목 GOLMOK"/><LanguageSelect/></div>
     <div className="login-landing-hero"><div className="login-landing-media" aria-hidden="true"/><h1>{t.title}</h1><p>{t.intro}</p></div>
     <div className="login-landing-actions">
       <button type="button" className="login-primary" onClick={guest}>{t.start}</button>
