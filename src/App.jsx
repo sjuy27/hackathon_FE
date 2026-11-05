@@ -13,7 +13,7 @@ import Shorts from './Shorts'
 import Profile, { LanguageSelect, NavIcon } from './Profile'
 import PagePosition from './PagePosition'
 import { copy } from './locale'
-import Contents from './Contents'
+import ContentsFeedPage from './pages/ContentsFeedPage'
 import { rememberShop } from './local-history'
 
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30000 } } })
@@ -74,6 +74,7 @@ function Shell() {
   const isLogin = ['/login', '/merchant/login'].includes(location.pathname)
   const viewLang = isMerchant ? 'ko' : lang, t = copy[viewLang]
   const customHeader = ['/contents', '/profile'].includes(location.pathname) || isLogin
+  const designRoute = location.pathname === '/contents'
   const isFeed = location.pathname === '/' || location.pathname === '/shorts'
   function changeLanguage(next) {
     if (!['en', 'ko', 'zh'].includes(next)) return
@@ -83,11 +84,11 @@ function Shell() {
   return <Language.Provider value={viewLang}><LanguageSettings.Provider value={changeLanguage}>
     <SubtitleSettings.Provider value={{ lang: isMerchant ? 'ko' : subtitleChoice === 'auto' ? lang : subtitleChoice, choice: subtitleChoice, setChoice: changeSubtitles }}><PagePosition/>
     {!isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools">{isMerchant ? <span className="merchant-badge">사장님 모드</span> : <LanguageSelect/>}</div></header>}
-    <main className={isFeed ? 'feed-main' : isLogin ? 'login-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
+    <main className={designRoute ? 'design-route' : isFeed ? 'feed-main' : isLogin ? 'login-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
       <Route path="/" element={readRole() ? <Shorts/> : <Navigate to="/login" replace/>}/><Route path="/shorts" element={<Shorts/>}/>
       <Route path="/markets" element={<Explore/>}/><Route path="/markets/:id" element={<Market/>}/>
       <Route path="/stores/:id" element={<Store/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
-      <Route path="/contents" element={<Contents/>}/><Route path="/contents/:id" element={<Content/>}/>
+      <Route path="/contents" element={<ContentsFeedPage/>}/><Route path="/contents/:id" element={<Content/>}/>
       <Route path="/profile" element={<Profile/>}/><Route path="/login" element={<Login/>}/><Route path="/merchant/login" element={<MerchantLogin/>}/><Route path="/merchant/*" element={<Merchant/>}/>
       <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>
     </Routes></main>
