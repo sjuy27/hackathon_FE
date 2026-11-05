@@ -6,7 +6,6 @@ import { Empty, Money, State, VideoPlayer } from './shared'
 import { Language, LanguageSettings, SubtitleSettings, useApi } from './data'
 import { Merchant } from './Merchant'
 import LoginPage, { MerchantLoginPage } from './pages/LoginPage'
-import { readRole } from './auth'
 import FeedPage from './pages/FeedPage'
 import Profile, { LanguageSelect, NavIcon } from './Profile'
 import PagePosition from './PagePosition'
@@ -52,12 +51,12 @@ function Shell() {
   const location = useLocation()
   // 사장님 화면(/merchant/...)은 손님이 고른 언어와 상관없이 항상 한국어로 보여준다.
   const isMerchant = location.pathname.startsWith('/merchant')
-  const isLogin = ['/login', '/merchant/login'].includes(location.pathname)
+  const isLogin = ['/', '/login', '/merchant/login'].includes(location.pathname)
   const viewLang = isMerchant ? 'ko' : lang, t = copy[viewLang]
   const customHeader = ['/contents', '/profile'].includes(location.pathname) || isLogin
   const storeRoute = /^\/stores\/[^/]+(?:\/order)?$/.test(location.pathname)
   const designRoute = (isMerchant && !isLogin) || location.pathname === '/contents' || /^\/markets(?:\/[^/]+)?$/.test(location.pathname) || storeRoute
-  const isFeed = location.pathname === '/' || location.pathname === '/shorts'
+  const isFeed = location.pathname === '/shorts'
   function changeLanguage(next) {
     if (!['en', 'ko', 'zh'].includes(next)) return
     setLang(next)
@@ -67,12 +66,12 @@ function Shell() {
     <SubtitleSettings.Provider value={{ lang: isMerchant ? 'ko' : subtitleChoice === 'auto' ? lang : subtitleChoice, choice: subtitleChoice, setChoice: changeSubtitles }}><PagePosition/>
     {!designRoute && !isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools">{isMerchant ? <span className="merchant-badge">사장님 모드</span> : <LanguageSelect/>}</div></header>}
     <main className={`${designRoute ? 'design-route' : isFeed ? 'feed-main' : isLogin ? 'login-main' : customHeader ? 'designed-main' : ''}${isMerchant && largeText ? ' host-large-text' : ''}`} key={location.pathname + lang}><Routes>
-      <Route path="/" element={readRole() ? <FeedPage/> : <Navigate to="/login" replace/>}/><Route path="/shorts" element={<FeedPage/>}/>
+      <Route path="/" element={<LoginPage/>}/><Route path="/shorts" element={<FeedPage/>}/>
       <Route path="/markets" element={<MarketFeedPage/>}/><Route path="/markets/:id" element={<MarketMenuFeedPage/>}/>
       <Route path="/stores/:id" element={<StoreMenuPage/>}/><Route path="/stores/:id/order" element={<OrderPreviewPage/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<ContentsFeedPage/>}/><Route path="/contents/:id" element={<Content/>}/>
       <Route path="/host" element={<Navigate to="/merchant" replace/>}/><Route path="/profile" element={<Profile/>}/><Route path="/login" element={<LoginPage/>}/><Route path="/merchant/login" element={<MerchantLoginPage/>}/><Route path="/merchant/*" element={<Merchant/>}/>
-      <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>
+      <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/shorts">{t.home}</Link></div>}/>
     </Routes></main>
     {!designRoute && !isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
     {isLogin || storeRoute ? null : isMerchant ? (!['/merchant/register','/merchant/review','/merchant/video'].includes(location.pathname) && <nav className={`mobile-nav host-navigation${largeText ? ' host-large-text' : ''}`} aria-label="사장님 메뉴">
@@ -81,7 +80,7 @@ function Shell() {
       <NavLink to="/merchant/stats"><NavIcon type="stats"/><span>통계</span></NavLink>
       <NavLink to="/merchant/profile"><NavIcon type="profile"/><span>마이페이지</span></NavLink>
     </nav>) : <nav className="mobile-nav" aria-label={t.map}>
-      <NavLink to="/" end className={({ isActive }) => isActive || location.pathname === '/shorts' ? 'active' : ''}><NavIcon type="feed"/><span>{t.feed}</span></NavLink>
+      <NavLink to="/shorts" end><NavIcon type="feed"/><span>{t.feed}</span></NavLink>
       <NavLink to="/contents"><NavIcon type="contents"/><span>{t.contents}</span></NavLink>
       <NavLink to="/markets"><NavIcon type="map"/><span>{t.map}</span></NavLink>
       <NavLink to="/profile"><NavIcon type="profile"/><span>{t.profile}</span></NavLink>
