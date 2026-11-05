@@ -1,8 +1,7 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { api } from './api'
-import { Language } from './data'
-import { loginMerchant, saveRole } from './auth'
+import { Language, useApi } from './data'
+import { DEMO_STORE_ID, loginMerchant, saveRole } from './auth'
 import { LanguageSelect, NavIcon } from './Profile'
 
 const loginCopy = {
@@ -25,29 +24,14 @@ export function Login() {
   </div>
 }
 
-// 사장님 로그인. 인증 API가 없어서 가게 번호로 내 가게를 불러온다(사장님 화면은 항상 한국어).
+// 사장님 로그인(사장님 화면은 항상 한국어). 인증 API가 없고, 데모는 데모 가게가 선택된 상태로 시작한다(가게 번호 입력칸 없음).
 export function MerchantLogin() {
-  const navigate = useNavigate(), [storeId, setStoreId] = useState(''), [error, setError] = useState(''), [busy, setBusy] = useState(false)
-  async function submit(e) {
-    e.preventDefault()
-    setBusy(true); setError('')
-    try {
-      await api(`/stores/${Number(storeId)}?lang=ko`)
-      loginMerchant(Number(storeId))
-      navigate('/merchant/video', { replace: true })
-    } catch {
-      setError('가게를 찾을 수 없어요. 가게 번호를 다시 확인해 주세요.')
-    } finally { setBusy(false) }
-  }
-  function register() { loginMerchant(null); navigate('/merchant/register', { replace: true }) }
+  const navigate = useNavigate(), store = useApi(`/stores/${DEMO_STORE_ID}`)
+  function login(to) { loginMerchant(DEMO_STORE_ID); navigate(to, { replace: true }) }
   return <div className="login-page">
     <div className="login-top"><Link className="back" to="/login">← 처음으로</Link></div>
-    <div className="login-hero"><span className="eyebrow">사장님 모드</span><h1>사장님, 어서 오세요</h1><p>가게 번호를 넣으면 내 가게를 바로 관리할 수 있어요.</p></div>
-    <form className="panel login-form" onSubmit={submit}>
-      <label>가게 번호<input type="number" min="1" required inputMode="numeric" value={storeId} onChange={e => setStoreId(e.target.value)} placeholder="예: 3" /></label>
-      {error && <p className="error" role="alert">{error}</p>}
-      <button className="button full" disabled={busy || !storeId}>{busy ? '확인 중…' : '로그인'}</button>
-    </form>
-    <div className="login-new"><p>처음 오셨나요?</p><button className="button outline full" onClick={register}>말로 가게 등록하기</button></div>
+    <div className="login-hero"><span className="eyebrow">사장님 모드</span><h1>사장님, 어서 오세요</h1><p>내 가게를 바로 관리할 수 있어요.</p></div>
+    <div className="panel login-form"><span className="small">내 가게</span><strong className="login-store">{store.data ? store.data.name_ko || store.data.name : store.isError ? '가게 정보를 불러오지 못했어요' : '불러오는 중…'}</strong><button className="button full" onClick={() => login('/merchant/video')}>이 가게로 시작하기</button></div>
+    <div className="login-new"><p>가게 정보를 새로 말해 주실래요?</p><button className="button outline full" onClick={() => login('/merchant/register')}>말로 가게 등록하기</button></div>
   </div>
 }

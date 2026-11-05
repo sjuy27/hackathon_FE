@@ -4,10 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import { ErrorMessage, State, VideoPlayer } from './shared'
 import { useApi } from './data'
-import { logoutMerchant, readRole } from './auth'
+import { DEMO_STORE_ID, logoutMerchant, readRole } from './auth'
 
-// 데모는 이 가게가 선택된 상태로 시작한다(가게 번호 입력칸 없음). 다른 가게로 시연하려면 VITE_DEMO_STORE_ID 로 바꾼다.
-const DEMO_STORE_ID = Number(import.meta.env.VITE_DEMO_STORE_ID) || 1
 const STEPS = ['store_name', 'menus', 'payment', 'hours', 'story']
 const stepNames = { store_name: '가게 이름', menus: '메뉴', payment: '결제 수단', hours: '영업시간', story: '가게 이야기' }
 const paymentNames = { cash: '현금', card: '카드', foreign_card: '해외 카드', onnuri: '온누리상품권' }
@@ -50,7 +48,7 @@ function VoiceRecorder({ label, maxSeconds, onDone, disabled }) {
 // 말하는 대로 글자 띄우기(Web Speech API). 받아쓰는 중에도 글을 고칠 수 있다.
 // 지원하지 않는 브라우저는 녹음 파일로 대신 보낸다.
 function SpeechAnswer({ value, onChange, audio, onAudio }) {
-  const rec = useRef(null), base = useRef(''), from = useRef(0), seen = useRef(0), [listening, setListening] = useState(false), [error, setError] = useState('')
+  const rec = useRef(null), base = useRef(''), from = useRef(0), seen = useRef(0), [listening, setListening] = useState(false), [error, setError] = useState(''), [recordInstead, setRecordInstead] = useState(!SpeechRecognition)
   useEffect(() => () => rec.current?.abort(), [])
   function start() {
     const r = new SpeechRecognition()
@@ -62,23 +60,36 @@ function SpeechAnswer({ value, onChange, audio, onAudio }) {
       for (let i = from.current; i < e.results.length; i++) said += e.results[i][0].transcript
       onChange(base.current + said.trimStart())
     }
-    r.onerror = e => { if (!['aborted', 'no-speech'].includes(e.error)) setError(e.error === 'not-allowed' ? '마이크 권한을 허용해 주세요.' : '음성을 알아듣지 못했어요. 다시 말하거나 글로 적어 주세요.') }
+    r.onerror = e => {
+      if (['aborted', 'no-speech'].includes(e.error)) return
+      // 인터넷·음성 서비스 문제로 받아쓰기가 안 되면 녹음 파일로 보내게 바꾼다.
+      if (['network', 'service-not-allowed', 'language-not-supported'].includes(e.error)) { setRecordInstead(true); setError('받아쓰기를 쓸 수 없어서 녹음으로 바꿨어요.'); return }
+      setError(e.error === 'not-allowed' ? '마이크 권한을 허용해 주세요.' : '음성을 알아듣지 못했어요. 다시 말하거나 글로 적어 주세요.')
+    }
     r.onend = () => setListening(false)
     rec.current = r; setError(''); r.start(); setListening(true)
   }
   function edit(text) {
     onChange(text)
-    if (listening) { base.current = text; from.current = seen.current }
+    if (listening) { base.current = text && !/\s$/.test(text) ? `${text} ` : text; from.current = seen.current }
   }
   return <>
     <label>말하거나 적어 주세요<textarea maxLength={2000} value={value} onChange={e => edit(e.target.value)} placeholder="마이크 버튼을 누르고 말하면 여기에 글자가 떠요." /></label>
-    {SpeechRecognition
+    {!recordInstead
       ? <div className="audio-input"><button type="button" className={`button outline ${listening ? 'listening' : ''}`} onClick={() => listening ? rec.current.stop() : start()}>{listening ? '■ 그만 말하기' : '● 말로 답하기'}</button>{listening && <span className="listening-hint" role="status">듣고 있어요…</span>}{error && <p className="error" role="alert">{error}</p>}</div>
-      : audio ? <p className="notice">녹음한 답변이 준비됐어요. <button type="button" onClick={() => onAudio(null)}>녹음 취소</button></p> : <VoiceRecorder label="● 녹음해서 답하기" onDone={onAudio} />}
+      : <>{error && <p className="small" role="status">{error}</p>}{audio ? <p className="notice">녹음한 답변이 준비됐어요. <button type="button" onClick={() => onAudio(null)}>녹음 취소</button></p> : <VoiceRecorder label="● 녹음해서 답하기" onDone={onAudio} />}</>}
   </>
 }
 
-function needsCheckText(item) { return item.replace(/[a-z_]+/g, k => keyNames[k] || k) }
+// needs_check 항목(예: name_ko, menus[1].price)을 사장님이 읽을 수 있는 말로 바꾼다.
+function needsCheckText(item, step) {
+  return item
+    .replace(/menus\[(\d+)\]\.name_ko/g, (_, n) => `메뉴 ${Number(n) + 1} 이름`)
+    .replace(/menus\[(\d+)\]\.?/g, (_, n) => `메뉴 ${Number(n) + 1} `)
+    .replace(/name_ko/g, step === 'menus' || /menus/.test(item) ? '메뉴 이름' : '가게 이름')
+    .replace(/[a-z_]+/g, k => keyNames[k] || k)
+    .trim()
+}
 // 확인 화면: 그 단계 항목만 보여준다.
 function StepFields({ step, value, onChange }) {
   const set = patch => onChange({ ...value, ...patch })
@@ -95,8 +106,8 @@ function StepFields({ step, value, onChange }) {
   }
   return null
 }
-function NeedsCheck({ items }) {
-  return items?.length ? <ul className="needs-check">{items.map((n, i) => <li key={i}><span className="check-badge">확인 필요</span>{needsCheckText(n)}</li>)}</ul> : null
+function NeedsCheck({ items, step }) {
+  return items?.length ? <ul className="needs-check">{items.map((n, i) => <li key={i}><span className="check-badge">확인 필요</span>{needsCheckText(n, step)}</li>)}</ul> : null
 }
 function SummaryStep({ step, value, sessionId, onSaved }) {
   const [edits, setEdits] = useState(value)
@@ -131,7 +142,7 @@ function Onboarding({ storeId, onPublished }) {
       <div className="bubble bot"><strong>{active.question_ko}</strong>{active.example_ko && <small>예: {active.example_ko}</small>}</div>
       {sent && <div className="bubble me">{sent}</div>}
       {send.isPending && <div className="bubble bot thinking">정리하고 있어요<span className="dots" aria-hidden="true"><i/><i/><i/></span></div>}
-      {answer && <div className="bubble bot confirm"><strong>{answer.confirm_text_ko}</strong><NeedsCheck items={answer.needs_check} /><StepFields step={answer.step} value={edits} onChange={setEdits} /><div className="actions"><button className="button" disabled={confirm.isPending} onClick={() => confirm.mutate(true)}>맞아요, 다음으로 →</button><button disabled={confirm.isPending} onClick={() => confirm.mutate(false)}>다시 답하기</button></div></div>}
+      {answer && <div className="bubble bot confirm"><strong>{answer.confirm_text_ko}</strong><NeedsCheck items={answer.needs_check} step={answer.step} /><StepFields step={answer.step} value={edits} onChange={setEdits} /><div className="actions"><button className="button" disabled={confirm.isPending} onClick={() => confirm.mutate(true)}>맞아요, 다음으로 →</button><button disabled={confirm.isPending} onClick={() => confirm.mutate(false)}>다시 답하기</button></div></div>}
     </div>
     {!answer && !send.isPending && <form onSubmit={e => { e.preventDefault(); send.mutate() }}><SpeechAnswer value={input} onChange={setInput} audio={audio} onAudio={setAudio} /><button className="button" disabled={!input.trim() && !audio}>보내기 →</button></form>}
   </>}<button className="text-button" onClick={() => { setSessionId(null); reset(null); setDone(false); remember('golmok-session', '') }}>처음부터 새로 등록</button></>}{[start.error, send.error, confirm.error, publish.error].map((e, i) => <ErrorMessage key={i} error={e} />)}</section>

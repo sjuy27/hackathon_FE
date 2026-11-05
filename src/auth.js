@@ -2,6 +2,8 @@
 // role: 'guest' | 'merchant' | null(아직 고르지 않음)
 const ROLE_KEY = 'golmok-role'
 const STORE_KEY = 'golmok-store'
+// 데모는 이 가게가 선택된 상태로 시작한다(가게 번호 입력칸 없음). 다른 가게로 시연하려면 VITE_DEMO_STORE_ID 로 바꾼다.
+export const DEMO_STORE_ID = Number(import.meta.env.VITE_DEMO_STORE_ID) || 1
 
 export function readRole() {
   try { return localStorage.getItem(ROLE_KEY) } catch { return null }

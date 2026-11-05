@@ -450,3 +450,4 @@ main.login-main { margin: 0; padding: 0; min-height: 0; }
 .needs-check .check-badge { margin-left: 0; }
 .button.listening { background: var(--primary); color: #fff; }
 .listening-hint { font-size: 12px; color: var(--primary); font-weight: 700; }
+.login-store { font-size: 18px; }
