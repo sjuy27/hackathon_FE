@@ -5,7 +5,7 @@ import { mediaUrl } from './api'
 import { Empty, Money, State, VideoPlayer } from './shared'
 import { Language, LanguageSettings, SubtitleSettings, useApi } from './data'
 import { Merchant } from './Merchant'
-import { Login, MerchantLogin } from './Login'
+import LoginPage, { MerchantLoginPage } from './pages/LoginPage'
 import { readRole } from './auth'
 import FeedPage from './pages/FeedPage'
 import Profile, { LanguageSelect, NavIcon } from './Profile'
@@ -69,7 +69,7 @@ function Shell() {
       <Route path="/markets" element={<MarketFeedPage/>}/><Route path="/markets/:id" element={<MarketMenuFeedPage/>}/>
       <Route path="/stores/:id" element={<StoreMenuPage/>}/><Route path="/stores/:id/order" element={<OrderPreviewPage/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<ContentsFeedPage/>}/><Route path="/contents/:id" element={<Content/>}/>
-      <Route path="/profile" element={<Profile/>}/><Route path="/login" element={<Login/>}/><Route path="/merchant/login" element={<MerchantLogin/>}/><Route path="/merchant/*" element={<Merchant/>}/>
+      <Route path="/profile" element={<Profile/>}/><Route path="/login" element={<LoginPage/>}/><Route path="/merchant/login" element={<MerchantLoginPage/>}/><Route path="/merchant/*" element={<Merchant/>}/>
       <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>
     </Routes></main>
     {!designRoute && !isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
