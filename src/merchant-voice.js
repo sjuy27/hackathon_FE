@@ -1,5 +1,4 @@
 export const VOICE_SILENCE_MS = 2000
-export const CONFIRM_WAIT_MS = 2500
 
 // 질문 읽기와 마이크 수집을 순서대로 실행한다. 취소된 읽기는 다음 수집을 시작하지 않는다.
 export function speakQuestion(text, onEnd, onError = () => {}) {
