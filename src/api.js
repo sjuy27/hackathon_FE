@@ -7,7 +7,10 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   const data = await response.json().catch(() => null)
   if (!response.ok) {
     const detail = Array.isArray(data?.detail) ? data.detail.map(x => x.msg).join(', ') : typeof data?.detail === 'string' ? data.detail : null
-    throw new Error(data?.error?.message || detail || `요청 실패 (${response.status})`)
+    const error = new Error(data?.error?.message || detail || `요청 실패 (${response.status})`)
+    error.code = data?.error?.code
+    error.status = response.status
+    throw error
   }
   if (data === null) throw new Error('API 응답을 읽을 수 없습니다. 잠시 후 다시 시도해주세요.')
   return method === 'GET' ? localizeSchedules(data,new URLSearchParams(path.split('?')[1] || '').get('lang')) : data

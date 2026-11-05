@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 import { LanguageSelect } from '../Profile'
 import Photo from './Photo'
 
-export function PageHeader({ title, back, showLanguage = true, end }) {
-  return <div className="mobile-heading">{back && <Link className="back-control" to={back} aria-label="Back">‹</Link>}<h1>{title}</h1>{end}{showLanguage && <LanguageSelect/>}</div>
+export function PageHeader({ title, back, onBack, showLanguage = true, end }) {
+  return <div className="mobile-heading">{onBack ? <button type="button" className="back-control" onClick={onBack} aria-label="뒤로">‹</button> : back && <Link className="back-control" to={back} aria-label="Back">‹</Link>}<h1>{title}</h1>{end}{showLanguage && <LanguageSelect/>}</div>
 }
 export function SearchInput({ label, value, onChange }) {
   return <label className="mobile-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/></svg><input type="search" aria-label={label} placeholder={label} value={value} onChange={event => onChange(event.target.value)}/></label>
