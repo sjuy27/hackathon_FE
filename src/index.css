@@ -357,7 +357,7 @@ select.language-pill { width: 43px; height: 32px; flex-shrink: 0; appearance: no
 .setting-row > span:last-child { font-size: 13px; color: #666; }
 .setting-row b { margin-left: 9px; color: #888; font-size: 18px; font-weight: 400; }
 .recent-shop { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eee; }
-.recent-placeholder { width: 43px; height: 43px; border-radius: 8px; background: #e7e7e7; flex-shrink: 0; }
+.recent-placeholder { object-fit: cover; display: block; width: 43px; height: 43px; border-radius: 8px; background: #e7e7e7; flex-shrink: 0; }
 .recent-shop > span:nth-child(2) { flex: 1; min-width: 0; }
 .recent-shop strong { display: block; font-size: 13px; }
 .recent-shop small { display: block; font-size: 10px; color: #666; margin-top: 3px; }
@@ -440,3 +440,5 @@ main.login-main { margin: 0; padding: 0; min-height: 0; }
 
 .food-photo { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; display: block; background: #e8e8e8; }
 .food-photo.small { width: 44px; height: 44px; margin-bottom: 6px; }
+
+.photo-credits { display: inline-block; margin-top: 12px; color: var(--muted, #666); font-size: 12px; }

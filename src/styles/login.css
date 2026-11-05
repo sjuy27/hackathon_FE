@@ -1,0 +1,29 @@
+/* 로그인(mvpLen.png): 첫 화면 / 사장님 로그인 */
+.login-landing, .merchant-login-page { display: flex; flex-direction: column; padding-bottom: calc(var(--spacing-unit) * 6); }
+.login-landing-top { display: flex; align-items: center; justify-content: space-between; min-height: var(--mobile-header-height); }
+.login-logo { font-size: var(--text-heading); font-weight: var(--weight-bold); color: var(--color-ink); }
+.login-landing-hero { display: grid; gap: calc(var(--spacing-unit) * 2); margin-top: calc(var(--spacing-unit) * 2); }
+.login-landing-media { width: 100%; aspect-ratio: 1; background: var(--color-placeholder); margin-bottom: calc(var(--spacing-unit) * 3); }
+.login-landing-hero h1 { margin: 0; font-size: 22px; white-space: pre-line; }
+.login-landing-hero p { margin: 0; font-size: var(--text-body); color: var(--color-muted); }
+.login-landing-actions { display: grid; gap: calc(var(--spacing-unit) * 3); margin-top: auto; padding-top: calc(var(--spacing-unit) * 10); }
+.login-primary, .login-secondary { width: 100%; min-height: 44px; margin: 0; border-radius: var(--radius-control); font-family: var(--font-mobile); font-size: var(--text-body); font-weight: var(--weight-bold); cursor: pointer; }
+.login-primary { border: 0; color: #fff; background: var(--color-clay); }
+.login-primary:hover { background: var(--color-clay-hover); }
+.login-secondary { border: 1px solid var(--color-line); color: var(--color-ink); background: var(--color-paper); font-weight: var(--weight-normal); }
+
+.merchant-login-icon { display: grid; place-items: center; width: 48px; height: 34px; margin-top: calc(var(--spacing-unit) * 6); border-radius: var(--radius-control); background: #f3e1df; color: var(--color-clay); }
+.merchant-login-icon svg { width: 20px; height: 20px; }
+.merchant-login-page h1 { margin: calc(var(--spacing-unit) * 8) 0 calc(var(--spacing-unit) * 2); font-size: var(--text-title); }
+.merchant-login-intro { margin: 0 0 calc(var(--spacing-unit) * 9); font-size: 15px; color: var(--color-muted); }
+.merchant-login-form { display: grid; gap: calc(var(--spacing-unit) * 4); }
+.merchant-login-form > label:not(.merchant-login-keep) { display: grid; gap: calc(var(--spacing-unit) * 3); font-size: var(--text-body); font-weight: var(--weight-bold); color: var(--color-ink); }
+.merchant-login-form input:not([type=checkbox]) { width: 100%; height: 52px; padding: 0 var(--mobile-inset); font-size: 16px; border: 1px solid #eee; border-radius: 2px; background: var(--color-field); }
+.merchant-login-keep { display: flex; align-items: center; gap: calc(var(--spacing-unit) * 4); margin: 0; font-size: var(--text-caption); color: var(--color-muted); }
+.merchant-login-keep input { width: 18px; height: 18px; margin: 0; accent-color: var(--color-clay); }
+.merchant-login-error { margin: 0; font-size: var(--text-caption); color: #c0392b; }
+.merchant-login-form .login-primary { margin-top: calc(var(--spacing-unit) * 3); }
+.merchant-login-links { display: flex; justify-content: center; align-items: center; gap: calc(var(--spacing-unit) * 4); margin-top: calc(var(--spacing-unit) * 6); color: #bbb; }
+.merchant-login-links button { min-height: 0; padding: 0; border: 0; background: none; font-size: var(--text-caption); font-weight: var(--weight-bold); color: var(--color-muted); cursor: pointer; }
+.merchant-login-links button.strong { color: var(--color-clay); }
+.merchant-login-guest { margin-top: auto; min-height: 44px; border: 0; background: none; font-size: var(--text-caption); font-weight: var(--weight-bold); color: var(--color-muted); cursor: pointer; }

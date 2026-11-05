@@ -1,7 +1,6 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LanguageSelect } from '../Profile'
-import { mediaUrl } from '../api'
+import Photo from './Photo'
 
 export function PageHeader({ title, back, showLanguage = true, end }) {
   return <div className="mobile-heading">{back && <Link className="back-control" to={back} aria-label="Back">‹</Link>}<h1>{title}</h1>{end}{showLanguage && <LanguageSelect/>}</div>
@@ -18,11 +17,6 @@ export function Button({ to, href, primary = false, className = '', children, ..
   if (href) return <a className={classes} href={href} target="_blank" rel="noreferrer" {...props}>{children}</a>
   return <button type="button" className={classes} {...props}>{children}</button>
 }
-function MediaImage({ src, alt, label }) {
-  const [failed, setFailed] = useState(false)
-  return src && !failed ? <img src={src} alt={alt} loading="lazy" onError={() => setFailed(true)}/> : <span className="mobile-media-placeholder" aria-label={alt}>{label}</span>
-}
-export function MediaSlot({ src, alt, kind = 'thumb', label = '' }) {
-  const url = mediaUrl(src)
-  return <span className={`mobile-media ${kind}`}><MediaImage key={url || 'empty'} src={url} alt={alt} label={label}/></span>
+export function MediaSlot({ src, fallback, alt, kind = 'thumb', label = '' }) {
+  return <span className={`mobile-media ${kind}`}><Photo src={src} fallback={fallback} alt={alt} placeholder={<span className="mobile-media-placeholder" aria-label={alt}>{label}</span>}/></span>
 }
