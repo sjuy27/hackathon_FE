@@ -15,7 +15,7 @@ export default function LoginPage() {
   const lang = useContext(Language), t = landingCopy[lang], navigate = useNavigate()
   function guest() { saveRole('guest'); navigate('/', { replace: true }) }
   // 로그인 상태를 유지한 사장님은 로그인 화면을 건너뛴다.
-  function merchant() { navigate(readRole() === 'merchant' ? '/merchant/video' : '/merchant/login') }
+  function merchant() { navigate(readRole() === 'merchant' ? '/merchant' : '/merchant/login') }
   return <div className="mobile-page login-landing">
     <div className="login-landing-top"><span className="login-logo">골목</span><LanguageSelect/></div>
     <div className="login-landing-hero"><div className="login-landing-media" aria-hidden="true"/><h1>{t.title}</h1><p>{t.intro}</p></div>
@@ -39,7 +39,7 @@ export function MerchantLoginPage() {
     if (!/^01\d-\d{3,4}-\d{4}$/.test(phone)) return setMessage('휴대폰 번호를 다시 확인해 주세요.')
     if (!password) return setMessage('비밀번호를 입력해 주세요.')
     loginMerchant(DEMO_STORE_ID, keep)
-    navigate('/merchant/video', { replace: true })
+    navigate('/merchant', { replace: true })
   }
   function register() { loginMerchant(DEMO_STORE_ID, keep); navigate('/merchant/register', { replace: true }) }
   function guest() { saveRole('guest'); navigate('/', { replace: true }) }

@@ -13,7 +13,7 @@ export default function HostVideoPage({ store }) {
   const storeId = store.store_id
   const [photos,setPhotos] = useState([]), [script,setScript] = useState(''), [audio,setAudio] = useState(null), [langs,setLangs] = useState(['en','zh']), [menu,setMenu] = useState(''), [jobId,setJobId] = useState(null), [slow,setSlow] = useState(false), [capturing,setCapturing] = useState(false), [message,setMessage] = useState('')
   const urls = useRef(new Set()), creating = useRef(false), spoken = useRef(null), scriptBox = useRef(null)
-  // 이전 버전에서 저장한 영상 작업을 복원하지 않고 새로 시작한다.
+  // 이전 버전에서 저장한 미리보기 작업은 다시 열지 않는다(사장님 화면을 다시 열면 영상 만들기를 처음부터).
   useEffect(()=>{try{localStorage.removeItem(`golmok-job-${storeId}`)}catch{/* Optional storage. */}},[storeId])
   useEffect(()=>{const ownedUrls=urls.current;return()=>{ownedUrls.forEach(url=>URL.revokeObjectURL(url));spoken.current?.()}},[])
   const create = useMutation({mutationFn:(payload={})=>{

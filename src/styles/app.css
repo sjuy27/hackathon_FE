@@ -1,5 +1,5 @@
 @import "tailwindcss";
 @import "../index.css";
 @import "./mobile.css";
-@import "./host.css";
 @import "./login.css";
+@import "./host.css";
