@@ -1,5 +1,5 @@
 ﻿import { useContext, useEffect, useState } from 'react'
-import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-query'
 import { api, mediaUrl } from './api'
 import { Empty, ErrorMessage, Money, State, VideoPlayer } from './shared'
@@ -13,6 +13,8 @@ import PagePosition from './PagePosition'
 import { copy } from './locale'
 import Contents from './Contents'
 import { rememberShop } from './local-history'
+import Landing from './Landing'
+import Account from './Account'
 
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30000 } } })
 function StoreCard({ store, index = 0 }) {
@@ -65,7 +67,8 @@ function Shell() {
   }
   const location = useLocation(), t = copy[lang]
   const customHeader = ['/contents', '/profile'].includes(location.pathname)
-  const isFeed = location.pathname === '/' || location.pathname === '/shorts'
+  const isFeed = ['/guest', '/shorts'].includes(location.pathname)
+  const rolePage = ['/', '/login', '/signup'].includes(location.pathname) || /^\/(host|merchant)(\/|$)/.test(location.pathname)
   function changeLanguage(next) {
     if (!['en', 'ko', 'zh'].includes(next)) return
     setLang(next)
@@ -73,22 +76,23 @@ function Shell() {
   }
   return <Language.Provider value={lang}><LanguageSettings.Provider value={changeLanguage}>
     <SubtitleSettings.Provider value={{ lang: subtitleChoice === 'auto' ? lang : subtitleChoice, choice: subtitleChoice, setChoice: changeSubtitles }}><PagePosition/>
-    {!isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools"><LanguageSelect/></div></header>}
-    <main className={isFeed ? 'feed-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
-      <Route path="/" element={<Shorts/>}/><Route path="/shorts" element={<Shorts/>}/>
+    {!rolePage && !isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools"><LanguageSelect/></div></header>}
+    <main className={rolePage ? 'role-main' : isFeed ? 'feed-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
+      <Route path="/" element={<Landing/>}/><Route path="/guest" element={<Shorts/>}/><Route path="/shorts" element={<Shorts/>}/>
+      <Route path="/host/*" element={<Merchant/>}/><Route path="/login" element={<Account/>}/><Route path="/signup" element={<Account signup/>}/>
       <Route path="/markets" element={<Explore/>}/><Route path="/markets/:id" element={<Market/>}/>
       <Route path="/stores/:id" element={<Store/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<Contents/>}/><Route path="/contents/:id" element={<Content/>}/>
-      <Route path="/profile" element={<Profile/>}/><Route path="/merchant/*" element={<Merchant/>}/>
+      <Route path="/profile" element={<Profile/>}/><Route path="/merchant/*" element={<Navigate to="/host" replace/>}/>
       <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>
     </Routes></main>
-    {!isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
-    <nav className="mobile-nav" aria-label={t.map}>
-      <NavLink to="/" end className={({ isActive }) => isActive || location.pathname === '/shorts' ? 'active' : ''}><NavIcon type="feed"/><span>{t.feed}</span></NavLink>
+    {!rolePage && !isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
+    {!rolePage && <nav className="mobile-nav" aria-label={t.map}>
+      <NavLink to="/shorts" className={({ isActive }) => isActive || location.pathname === '/guest' ? 'active' : ''}><NavIcon type="feed"/><span>{t.feed}</span></NavLink>
       <NavLink to="/contents"><NavIcon type="contents"/><span>{t.contents}</span></NavLink>
       <NavLink to="/markets"><NavIcon type="map"/><span>{t.map}</span></NavLink>
       <NavLink to="/profile"><NavIcon type="profile"/><span>{t.profile}</span></NavLink>
-    </nav>
+    </nav>}
   </SubtitleSettings.Provider></LanguageSettings.Provider></Language.Provider>
 }
 export default function App() { return <QueryClientProvider client={client}><BrowserRouter><Shell /></BrowserRouter></QueryClientProvider> }
