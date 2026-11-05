@@ -1,10 +1,12 @@
 ﻿import { useContext, useEffect, useState } from 'react'
-import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-query'
 import { api, mediaUrl } from './api'
 import { Empty, ErrorMessage, Money, State, VideoPlayer } from './shared'
 import { Language, LanguageSettings, SubtitleSettings, text, useApi } from './data'
 import { Merchant } from './Merchant'
+import { Login, MerchantLogin } from './Login'
+import { readRole } from './auth'
 import MarketMap from './MarketMap'
 import Dialog from './Dialog'
 import Shorts from './Shorts'
@@ -63,32 +65,41 @@ function Shell() {
     setSubtitleChoice(next)
     try { localStorage.setItem('golmok-subtitle-lang', next) } catch { /* Optional preference. */ }
   }
-  const location = useLocation(), t = copy[lang]
-  const customHeader = ['/contents', '/profile'].includes(location.pathname)
+  const location = useLocation()
+  // 사장님 화면(/merchant/...)은 손님이 고른 언어와 상관없이 항상 한국어로 보여준다.
+  const isMerchant = location.pathname.startsWith('/merchant')
+  const isLogin = ['/login', '/merchant/login'].includes(location.pathname)
+  const viewLang = isMerchant ? 'ko' : lang, t = copy[viewLang]
+  const customHeader = ['/contents', '/profile'].includes(location.pathname) || isLogin
   const isFeed = location.pathname === '/' || location.pathname === '/shorts'
   function changeLanguage(next) {
     if (!['en', 'ko', 'zh'].includes(next)) return
     setLang(next)
     try { localStorage.setItem('market-lang', next) } catch { /* Storage is optional. */ }
   }
-  return <Language.Provider value={lang}><LanguageSettings.Provider value={changeLanguage}>
-    <SubtitleSettings.Provider value={{ lang: subtitleChoice === 'auto' ? lang : subtitleChoice, choice: subtitleChoice, setChoice: changeSubtitles }}><PagePosition/>
-    {!isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools"><LanguageSelect/></div></header>}
-    <main className={isFeed ? 'feed-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
-      <Route path="/" element={<Shorts/>}/><Route path="/shorts" element={<Shorts/>}/>
+  return <Language.Provider value={viewLang}><LanguageSettings.Provider value={changeLanguage}>
+    <SubtitleSettings.Provider value={{ lang: isMerchant ? 'ko' : subtitleChoice === 'auto' ? lang : subtitleChoice, choice: subtitleChoice, setChoice: changeSubtitles }}><PagePosition/>
+    {!isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools">{isMerchant ? <span className="merchant-badge">사장님 모드</span> : <LanguageSelect/>}</div></header>}
+    <main className={isFeed ? 'feed-main' : isLogin ? 'login-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
+      <Route path="/" element={readRole() ? <Shorts/> : <Navigate to="/login" replace/>}/><Route path="/shorts" element={<Shorts/>}/>
       <Route path="/markets" element={<Explore/>}/><Route path="/markets/:id" element={<Market/>}/>
       <Route path="/stores/:id" element={<Store/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<Contents/>}/><Route path="/contents/:id" element={<Content/>}/>
-      <Route path="/profile" element={<Profile/>}/><Route path="/merchant/*" element={<Merchant/>}/>
+      <Route path="/profile" element={<Profile/>}/><Route path="/login" element={<Login/>}/><Route path="/merchant/login" element={<MerchantLogin/>}/><Route path="/merchant/*" element={<Merchant/>}/>
       <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>
     </Routes></main>
     {!isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
-    <nav className="mobile-nav" aria-label={t.map}>
+    {isLogin ? null : isMerchant ? <nav className="mobile-nav" aria-label="사장님 메뉴">
+      <NavLink to="/merchant/register"><NavIcon type="mic"/><span>가게 등록</span></NavLink>
+      <NavLink to="/merchant/video"><NavIcon type="video"/><span>영상 만들기</span></NavLink>
+      <NavLink to="/merchant/edit"><NavIcon type="edit"/><span>정보 수정</span></NavLink>
+      <NavLink to="/" end><NavIcon type="feed"/><span>손님 화면</span></NavLink>
+    </nav> : <nav className="mobile-nav" aria-label={t.map}>
       <NavLink to="/" end className={({ isActive }) => isActive || location.pathname === '/shorts' ? 'active' : ''}><NavIcon type="feed"/><span>{t.feed}</span></NavLink>
       <NavLink to="/contents"><NavIcon type="contents"/><span>{t.contents}</span></NavLink>
       <NavLink to="/markets"><NavIcon type="map"/><span>{t.map}</span></NavLink>
       <NavLink to="/profile"><NavIcon type="profile"/><span>{t.profile}</span></NavLink>
-    </nav>
+    </nav>}
   </SubtitleSettings.Provider></LanguageSettings.Provider></Language.Provider>
 }
 export default function App() { return <QueryClientProvider client={client}><BrowserRouter><Shell /></BrowserRouter></QueryClientProvider> }

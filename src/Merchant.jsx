@@ -1,9 +1,10 @@
 ﻿import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import { ErrorMessage, State, VideoPlayer } from './shared'
 import { useApi } from './data'
+import { logoutMerchant, readRole } from './auth'
 
 const fieldLabels = { name_ko: '메뉴·가게 이름', name: '이름', address: '주소', menus: '메뉴 목록', price: '가격 (원)', spicy_level: '매운 정도 (0~3)', is_ai_guess: 'AI 추정 정보', payment: '결제 수단 (cash / card / foreign_card / onnuri)', hours: '영업시간', story_ko: '가게 이야기' }
 function RegistrationPreview({ value }) {
@@ -77,10 +78,15 @@ function EditStore({ store }) {
   return <section className="panel"><h2>가게·메뉴 정보 수정</h2><form onSubmit={e => { e.preventDefault(); save.mutate() }}>{[['name', '가게 이름', 100], ['address', '주소', 300], ['hours', '영업시간', 200], ['story_ko', '가게 이야기', 1000]].map(([key, label, max]) => <label key={key}>{label}<input required={key === 'name'} maxLength={max} value={values[key]} onChange={e => setValues(v => ({ ...v, [key]: e.target.value }))} /></label>)}<fieldset><legend>결제 수단</legend>{[['cash', '현금'], ['card', '카드'], ['foreign_card', '해외 카드'], ['onnuri', '온누리']].map(([code, label]) => <label className="checkbox" key={code}><input type="checkbox" checked={values.payment.includes(code)} onChange={e => setValues(v => ({ ...v, payment: e.target.checked ? [...v.payment, code] : v.payment.filter(p => p !== code) }))} />{label}</label>)}</fieldset><button className="button" disabled={save.isPending}>정보 저장 · 번역 재생성</button><ErrorMessage error={save.error} />{save.isSuccess && <p role="status">가게 정보와 번역을 저장했습니다.</p>}</form><h3>메뉴 관리</h3>{store.menus.map(m => <EditMenu key={m.menu_id} menu={m} onSaved={refresh} />)}</section>
 }
 export function Merchant() {
-  const [tab, setTab] = useState('register'), [storeId, setStoreId] = useState(() => saved('golmok-store')), [idInput, setIdInput] = useState(() => String(saved('golmok-store') || ''))
+  // 탭은 주소(/merchant/register|video|edit)로 정해서 아래 사장님 툴바와 맞춘다.
+  const param = useParams()['*'], tab = ['register', 'video', 'edit'].includes(param) ? param : 'register', navigate = useNavigate()
+  const [storeId, setStoreId] = useState(() => saved('golmok-store')), [idInput, setIdInput] = useState(() => String(saved('golmok-store') || ''))
   const store = useApi(`/stores/${storeId}`, !!storeId)
-  function published(id) { setStoreId(id); setIdInput(String(id)); setTab('video') }
-  return <><div className="page-heading"><span className="eyebrow">FOR OUR LOCAL MERCHANTS</span><h1>사장님의 이야기를<br/>세계에 들려주세요.</h1><p>가게 등록부터 다국어 소개, AI 영상까지 한곳에서.</p></div><div className="tabs">{[['register', '가게 등록'], ['video', '영상 만들기'], ['edit', '정보 수정']].map(([key, name]) => <button className={tab === key ? 'active' : ''} key={key} onClick={() => setTab(key)}>{name}</button>)}</div><div className="narrow merchant">{tab === 'register' ? <Onboarding onPublished={published} /> : <><form className="store-selector" onSubmit={e => { e.preventDefault(); setStoreId(Number(idInput)); remember('golmok-store', idInput) }}><label>관리할 가게 번호<input type="number" min="1" required value={idInput} onChange={e => setIdInput(e.target.value)} /></label><button>가게 불러오기</button></form>{storeId ? <State query={store}>{store.data && <><div className="notice"><strong>{store.data.name}</strong> · #{storeId} <Link to={`/stores/${storeId}`}>손님 화면 보기 ↗</Link></div>{tab === 'video' ? <GenerateVideo key={storeId} storeId={storeId} /> : <EditStore key={storeId} store={store.data} />}</>}</State> : <p className="notice">등록된 가게 번호를 입력하거나 먼저 가게를 등록해주세요.</p>}</>}</div></>
+  function published(id) { setStoreId(id); setIdInput(String(id)); navigate('/merchant/video') }
+  function logout() { logoutMerchant(); navigate('/', { replace: true }) }
+  if (readRole() !== 'merchant') return <Navigate to="/merchant/login" replace/>
+  if (param !== tab) return <Navigate to={`/merchant/${tab}`} replace/>
+  return <><div className="page-heading"><span className="eyebrow">FOR OUR LOCAL MERCHANTS</span><h1>사장님의 이야기를<br/>세계에 들려주세요.</h1><p>가게 등록부터 다국어 소개, AI 영상까지 한곳에서.</p></div><div className="merchant-bar"><span>{{ register: '가게 등록', video: '영상 만들기', edit: '정보 수정' }[tab]}</span><button className="button outline" onClick={logout}>로그아웃</button></div><div className="narrow merchant">{tab === 'register' ? <Onboarding onPublished={published} /> : <><form className="store-selector" onSubmit={e => { e.preventDefault(); setStoreId(Number(idInput)); remember('golmok-store', idInput) }}><label>관리할 가게 번호<input type="number" min="1" required value={idInput} onChange={e => setIdInput(e.target.value)} /></label><button>가게 불러오기</button></form>{storeId ? <State query={store}>{store.data && <><div className="notice"><strong>{store.data.name}</strong> · #{storeId} <Link to={`/stores/${storeId}`}>손님 화면 보기 ↗</Link></div>{tab === 'video' ? <GenerateVideo key={storeId} storeId={storeId} /> : <EditStore key={storeId} store={store.data} />}</>}</State> : <p className="notice">등록된 가게 번호를 입력하거나 먼저 가게를 등록해주세요.</p>}</>}</div></>
 }
 
 
