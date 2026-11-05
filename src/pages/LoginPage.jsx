@@ -4,6 +4,7 @@ import { Language } from '../data'
 import { DEMO_STORE_ID, loginMerchant, readRole, saveRole } from '../auth'
 import { LanguageSelect, NavIcon } from '../Profile'
 import logo from '../assets/golmok-logo.png'
+import landingVideo from '../assets/landing.mp4'
 
 // lending.png: 첫 화면(게스트로 둘러보기 / 사장님 로그인)
 const landingCopy = {
@@ -19,7 +20,7 @@ export default function LoginPage() {
   function merchant() { navigate(readRole() === 'merchant' ? '/merchant' : '/merchant/login') }
   return <div className="mobile-page login-landing">
     <div className="login-landing-top"><img className="login-logo" src={logo} alt="골목 GOLMOK"/><LanguageSelect/></div>
-    <div className="login-landing-hero"><div className="login-landing-media" aria-hidden="true"/><h1>{t.title}</h1><p>{t.intro}</p></div>
+    <div className="login-landing-hero"><video className="login-landing-media" src={landingVideo} autoPlay muted loop playsInline preload="auto" aria-hidden="true"/><h1>{t.title}</h1><p>{t.intro}</p></div>
     <div className="login-landing-actions">
       <button type="button" className="login-primary" onClick={guest}>{t.start}</button>
       <button type="button" className="login-secondary" onClick={merchant}><span lang="ko">사장님 로그인</span> · Merchant</button>

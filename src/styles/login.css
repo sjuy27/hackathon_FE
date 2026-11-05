@@ -3,7 +3,7 @@
 .login-landing-top { display: flex; align-items: center; justify-content: space-between; min-height: var(--mobile-header-height); }
 .login-logo { display: block; height: 22px; width: auto; }
 .login-landing-hero { display: grid; gap: calc(var(--spacing-unit) * 2); margin-top: calc(var(--spacing-unit) * 2); }
-.login-landing-media { width: 100%; aspect-ratio: 1; background: var(--color-placeholder); border-radius: var(--radius-card); margin-bottom: calc(var(--spacing-unit) * 3); }
+.login-landing-media { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--color-placeholder); border-radius: var(--radius-card); margin-bottom: calc(var(--spacing-unit) * 3); }
 .login-landing-hero h1 { margin: 0; font-size: 22px; white-space: pre-line; }
 .login-landing-hero p { margin: 0; font-size: var(--text-body); color: var(--color-muted); }
 .login-landing-actions { display: grid; gap: calc(var(--spacing-unit) * 3); margin-top: auto; padding-top: calc(var(--spacing-unit) * 10); }
