@@ -9,7 +9,7 @@ import { Login, MerchantLogin } from './Login'
 import { readRole } from './auth'
 import MarketMap from './MarketMap'
 import Dialog from './Dialog'
-import Shorts from './Shorts'
+import FeedPage from './pages/FeedPage'
 import Profile, { LanguageSelect, NavIcon } from './Profile'
 import PagePosition from './PagePosition'
 import { copy } from './locale'
@@ -85,7 +85,7 @@ function Shell() {
     <SubtitleSettings.Provider value={{ lang: isMerchant ? 'ko' : subtitleChoice === 'auto' ? lang : subtitleChoice, choice: subtitleChoice, setChoice: changeSubtitles }}><PagePosition/>
     {!isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools">{isMerchant ? <span className="merchant-badge">사장님 모드</span> : <LanguageSelect/>}</div></header>}
     <main className={designRoute ? 'design-route' : isFeed ? 'feed-main' : isLogin ? 'login-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
-      <Route path="/" element={readRole() ? <Shorts/> : <Navigate to="/login" replace/>}/><Route path="/shorts" element={<Shorts/>}/>
+      <Route path="/" element={readRole() ? <FeedPage/> : <Navigate to="/login" replace/>}/><Route path="/shorts" element={<FeedPage/>}/>
       <Route path="/markets" element={<Explore/>}/><Route path="/markets/:id" element={<Market/>}/>
       <Route path="/stores/:id" element={<Store/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<ContentsFeedPage/>}/><Route path="/contents/:id" element={<Content/>}/>
