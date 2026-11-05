@@ -32,6 +32,5 @@ export default function HostHome({ store, summary }) {
       <Link className="host-action" to="/host/edit"><RoleIcon name="edit"/><span><strong>메뉴·가격 고치기</strong><small>바뀐 가격을 바로 반영해요</small></span></Link>
     </div>
     <HostMetrics/>
-    <div className="host-account-links"><Link to="/signup">처음이세요? 회원가입</Link><Link to="/login">로그인</Link><Link to="/">역할 선택</Link></div>
   </div>
 }
