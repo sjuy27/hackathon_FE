@@ -11,9 +11,11 @@ export function State({ query, children }) {
   return children
 }
 export function Empty() { const lang = useContext(Language); return <p className="state">{copy[lang].empty}</p> }
-export function VideoPlayer({ video }) {
-  const { lang } = useContext(SubtitleSettings)
-  return <video key={lang} controls playsInline preload="metadata" poster={mediaUrl(video.thumbnail_url)} src={mediaUrl(video.video_url)} crossOrigin="anonymous">{Object.entries(video.subtitles || {}).map(([code, url]) => <track key={code} kind="subtitles" src={mediaUrl(url)} srcLang={code} label={{ ko: '한국어', en: 'English', zh: '中文' }[code] || code} default={code === lang} />)}</video>
+export function VideoPlayer({ video, language }) {
+  const uiLanguage = useContext(Language), subtitles = useContext(SubtitleSettings)
+  const lang = language || uiLanguage, trackLang = language || subtitles.lang
+  const src = mediaUrl(video.video_urls?.[lang] || video.video_url)
+  return <video key={`${src}-${trackLang}`} controls playsInline preload="metadata" poster={mediaUrl(video.thumbnail_url)} src={src} crossOrigin="anonymous">{Object.entries(video.subtitles || {}).map(([code, url]) => <track key={code} kind="subtitles" src={mediaUrl(url)} srcLang={code} label={{ ko: '한국어', en: 'English', zh: '中文' }[code] || code} default={code === trackLang} />)}</video>
 }
 
 

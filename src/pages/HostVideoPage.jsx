@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '../api'
-import { useApi } from '../data'
 import { speakQuestion } from '../merchant-voice'
 import { ErrorMessage, State, VideoPlayer } from '../shared'
 import { NavIcon } from '../Profile'
-import { Button, MediaSlot, PageHeader } from '../components/MobileUI'
+import { Button, FilterChips, MediaSlot, PageHeader } from '../components/MobileUI'
 import SpeechAnswer from '../components/host/SpeechAnswer'
 
 function scriptLines(script) { return script.split(/\n|(?<=[.!?。！？])\s+/).map(line=>line.trim()).filter(Boolean).length }
+const previewLanguages = [['en','EN'],['zh','中文'],['ko','한국어']]
 export default function HostVideoPage({ store }) {
   const storeId = store.store_id
   const [photos,setPhotos] = useState([]), [script,setScript] = useState(''), [audio,setAudio] = useState(null), [langs,setLangs] = useState(['en','zh']), [menu,setMenu] = useState(''), [jobId,setJobId] = useState(null), [slow,setSlow] = useState(false), [capturing,setCapturing] = useState(false), [message,setMessage] = useState('')
+  const [previewLang, setPreviewLang] = useState('en')
   const urls = useRef(new Set()), creating = useRef(false), spoken = useRef(null), scriptBox = useRef(null)
   // 이전 버전에서 저장한 미리보기 작업은 다시 열지 않는다(사장님 화면을 다시 열면 영상 만들기를 처음부터).
   useEffect(()=>{try{localStorage.removeItem(`golmok-job-${storeId}`)}catch{/* Optional storage. */}},[storeId])
@@ -30,7 +31,10 @@ export default function HostVideoPage({ store }) {
   const status=job.data?.status,busy=create.isPending||!!jobId&&(!job.data||['queued','processing'].includes(status))
   useEffect(()=>{if(!busy)return;const timer=setTimeout(()=>setSlow(true),30000);return()=>clearTimeout(timer)},[busy,jobId])
   const fallbackId=status==='failed'?job.data.fallback_video_id:busy&&slow?store.videos[0]?.video_id:null
-  const result=useApi(`/videos/${job.data?.video_id}`,status==='done'&&!!job.data?.video_id),fallback=useApi(`/videos/${fallbackId}`,!!fallbackId)
+  const result=useQuery({queryKey:[`/videos/${job.data?.video_id}`,'en'],enabled:status==='done'&&!!job.data?.video_id,queryFn:({signal})=>api(`/videos/${job.data.video_id}?lang=en`,{signal})})
+  const fallback=useQuery({queryKey:[`/videos/${fallbackId}`,'en'],enabled:!!fallbackId,queryFn:({signal})=>api(`/videos/${fallbackId}?lang=en`,{signal})})
+  const preview = status === 'done' ? result : fallbackId ? fallback : null
+  const availableLanguages = previewLanguages.filter(([code]) => preview?.data?.video_urls?.[code])
   function generate(payload={}) {if(creating.current||busy||capturing)return;creating.current=true;create.mutate(payload)}
   function finishScript(payload) {setCapturing(false);setScript(payload.text||'');setAudio(payload.audio||null);setMessage(payload.audio?'녹음한 설명이 준비됐어요.':'');if(photos.length>=1&&photos.length<=5){if(!creating.current&&!busy){creating.current=true;create.mutate(payload)}}else spoken.current=speakQuestion('설명이 준비됐어요. 사진을 선택한 다음 영상 만들기를 눌러 주세요.',()=>{})}
   function addPhotos(event) {
@@ -59,7 +63,7 @@ export default function HostVideoPage({ store }) {
   </form>
     {jobId&&<State query={job}><div className="notice" aria-live="polite"><h2>{({queued:'생성 대기 중이에요',processing:'영상을 만들고 있어요',done:'영상이 완성되었어요!',failed:'영상 생성에 실패했어요'})[status]}</h2>{busy&&<><progress value={job.data?.progress||0} max="100" aria-label="영상 생성 진행률"/><p>{job.data?.progress||0}%</p></>}{busy&&slow&&<p>시간이 조금 걸려서 기존 영상을 먼저 보여드려요.</p>}{status==='failed'&&<><ErrorMessage error={{message:job.data.error||'다시 시도해주세요.'}}/><Button onClick={()=>{resetJob();if(job.data.error_code==='RECORDING_TOO_LONG'){setAudio(null);scriptBox.current?.focus()}}}>다시 만들기</Button></>}</div></State>}
     {job.isError&&<Button onClick={resetJob}>다시 만들기</Button>}
-    {status==='done'?<State query={result}>{result.data&&<div className="host-video-result"><VideoPlayer video={result.data}/></div>}</State>:fallbackId&&<State query={fallback}>{fallback.data&&<div className="host-video-result"><VideoPlayer video={fallback.data}/></div>}</State>}
+    {preview&&<State query={preview}>{preview.data&&<div className="host-video-result">{availableLanguages.length>1&&<FilterChips label="영상 언어" options={availableLanguages} value={previewLang} onChange={setPreviewLang}/>}<VideoPlayer video={preview.data} language={previewLang}/></div>}</State>}
     <div className="host-footer"><Button type="submit" form="host-create-video" primary disabled={busy||capturing||!photos.length||photos.length>5}>{busy?'영상 생성 중…':'영상 만들기'}</Button></div>
   </div>
 }

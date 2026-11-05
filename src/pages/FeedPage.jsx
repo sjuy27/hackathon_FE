@@ -37,7 +37,7 @@ function Clip({ item }) {
     } catch (error) { if (error.name !== 'AbortError') setMessage(d.copyFailed) }
   }
   return <article className="short-slide" aria-label={store.name}>
-    <video ref={video} className="short-video" src={mediaUrl(item.video_url)} poster={mediaUrl(item.thumbnail_url)} playsInline loop muted preload="metadata" crossOrigin="anonymous" onPlay={() => setPaused(false)} onPause={() => setPaused(true)} onError={() => setFailed(true)}>
+    <video ref={video} className="short-video" src={mediaUrl(item.video_urls?.[lang] || item.video_url)} poster={mediaUrl(item.thumbnail_url)} playsInline loop muted preload="metadata" crossOrigin="anonymous" onPlay={() => setPaused(false)} onPause={() => setPaused(true)} onError={() => setFailed(true)}>
     </video><div className="short-shade"/>
     {!failed && <button className={`short-play ${paused ? 'is-paused' : ''}`} aria-label={paused ? t.play : t.pause} onClick={() => paused ? video.current.play().catch(() => {}) : video.current.pause()}>{paused ? '▷' : 'Ⅱ'}</button>}
     <div className="short-tools"><button aria-label={liked ? d.liked : d.like} aria-pressed={liked} onClick={() => toggle('golmok-liked-videos', liked, setLiked)}><NavIcon type="like"/></button><button onClick={share} aria-label={d.share}><NavIcon type="share"/></button></div>
