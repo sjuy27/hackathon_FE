@@ -150,3 +150,33 @@ main.feed-main { height: calc(100dvh - var(--mobile-nav-height) - env(safe-area-
 .selection-total strong { font-size: var(--text-heading); white-space: nowrap; }
 .selection-actions { display: flex; gap: calc(var(--spacing-unit) * 2); }
 .selection-actions > * { flex: 1; }
+
+/* feed.png: Korean order card with quantity controls and payment guidance. */
+.order-preview-page { padding-bottom: calc(var(--selection-bar-height) + var(--mobile-inset) + env(safe-area-inset-bottom)); }
+.order-preview-page .mobile-heading h1 { font-size: var(--text-heading); }
+.order-preview-page h2 { font-size: var(--text-body); margin: var(--mobile-inset) 0; }
+.order-menu-section { margin: 0 0 var(--mobile-inset); }
+.order-menu-identity { display: flex; align-items: center; gap: var(--mobile-gap); padding: var(--mobile-gap) 0; }
+.order-menu-identity > div { flex: 1; min-width: 0; }
+.order-menu-identity strong { font-size: var(--text-body); line-height: var(--leading-body); }
+.order-menu-identity p { margin: var(--spacing-unit) 0 0; color: var(--color-muted); font-size: var(--text-caption); }
+.order-how { background: var(--color-warm); padding: var(--mobile-gap); border-radius: var(--radius-control); }
+.order-how h3 { display: flex; justify-content: space-between; gap: var(--spacing-unit); font-size: var(--text-caption); margin: 0 0 calc(var(--spacing-unit) * 2); }
+.order-how small { font-size: var(--text-micro); font-weight: var(--weight-normal); color: var(--color-muted); }
+.order-how p { margin: 0; font-size: var(--text-caption); color: var(--color-muted); }
+.order-quantity { display: flex; justify-content: space-between; align-items: center; padding: var(--mobile-gap) 0; font-size: var(--text-caption); }
+.order-stepper { display: flex; align-items: center; border: 1px solid var(--color-line); border-radius: var(--radius-control); overflow: hidden; }
+.order-stepper button { border: 0; border-radius: 0; padding: calc(var(--spacing-unit) * 2) var(--mobile-gap); min-height: calc(var(--spacing-unit) * 10); background: var(--color-field); }
+.order-stepper output { padding: 0 var(--mobile-gap); }
+.order-preview-card { padding: var(--mobile-inset); background: var(--color-selected); border: 1px solid var(--color-clay); border-radius: var(--radius-card); margin: var(--mobile-inset) 0 calc(var(--spacing-unit) * 7); }
+.order-preview-card > span { font-size: var(--text-micro); color: var(--color-clay); font-weight: var(--weight-bold); }
+.order-preview-card h2 { font-size: calc(var(--spacing-unit) * 6); line-height: var(--leading-body); margin: calc(var(--spacing-unit) * 2) 0; }
+.order-preview-card p { font-size: var(--text-caption); color: var(--color-muted); margin-bottom: calc(var(--spacing-unit) * 2); }
+.order-item-tags { display: flex; gap: var(--spacing-unit); flex-wrap: wrap; }
+.order-item-tags small { color: var(--color-clay); font-size: var(--text-micro); background: var(--color-placeholder); border-radius: var(--spacing-unit); padding: var(--spacing-unit); }
+.pay-at-shop h2 { font-size: var(--text-body); }
+.pay-at-shop p { font-size: var(--text-caption); color: var(--color-muted); }
+.pay-at-shop > div { display: flex; justify-content: space-between; gap: var(--mobile-gap); font-size: var(--text-micro); color: var(--color-muted); margin: var(--mobile-inset) 0 calc(var(--spacing-unit) * 7); }
+.pay-at-shop > div > span:last-child { color: var(--color-clay); text-align: right; }
+.order-back-button { width: 100%; }
+.order-ready { color: var(--color-clay); font-size: var(--text-body); padding: var(--mobile-gap); background: var(--color-selected); }

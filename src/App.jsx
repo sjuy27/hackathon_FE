@@ -14,6 +14,7 @@ import PagePosition from './PagePosition'
 import { copy } from './locale'
 import ContentsFeedPage from './pages/ContentsFeedPage'
 import StoreMenuPage from './pages/StoreMenuPage'
+import OrderPreviewPage from './pages/OrderPreviewPage'
 
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30000 } } })
 function StoreCard({ store, index = 0 }) {
@@ -77,7 +78,7 @@ function Shell() {
     <main className={designRoute ? 'design-route' : isFeed ? 'feed-main' : isLogin ? 'login-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
       <Route path="/" element={readRole() ? <FeedPage/> : <Navigate to="/login" replace/>}/><Route path="/shorts" element={<FeedPage/>}/>
       <Route path="/markets" element={<Explore/>}/><Route path="/markets/:id" element={<Market/>}/>
-      <Route path="/stores/:id" element={<StoreMenuPage/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
+      <Route path="/stores/:id" element={<StoreMenuPage/>}/><Route path="/stores/:id/order" element={<OrderPreviewPage/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<ContentsFeedPage/>}/><Route path="/contents/:id" element={<Content/>}/>
       <Route path="/profile" element={<Profile/>}/><Route path="/login" element={<Login/>}/><Route path="/merchant/login" element={<MerchantLogin/>}/><Route path="/merchant/*" element={<Merchant/>}/>
       <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>

@@ -1,0 +1,5 @@
+export const mobileCopy = {
+  en: { menu: 'Menu', how: 'How to eat', servings: 'Servings', merchant: 'SHOW THIS TO THE MERCHANT', pay: 'Pay at the shop', payNote: 'This card helps you order in person. No in-app payment. Confirm your order and pay the merchant directly.', back: 'Back to shop menu', confirm: 'Confirm', ready: 'Ready to show', markets: 'Market map', searchMarkets: 'Search markets', searchMenu: 'Search menu', directions: 'Directions', visit: 'Visit this shop', all: 'All' },
+  ko: { menu: '메뉴', how: '먹는 방법', servings: '수량', merchant: '사장님께 이 화면을 보여주세요', pay: '가게에서 결제하세요', payNote: '현장에서 주문을 돕는 카드입니다. 앱 결제 없이 주문을 확인한 뒤 사장님께 직접 결제해주세요.', back: '가게 메뉴로 돌아가기', confirm: '확인', ready: '사장님께 보여주세요', markets: '시장 지도', searchMarkets: '시장 검색', searchMenu: '메뉴 검색', directions: '길찾기', visit: '가게 보기', all: '전체' },
+  zh: { menu: '菜单', how: '食用方法', servings: '数量', merchant: '请向店主出示此页面', pay: '到店付款', payNote: '此卡帮助您现场点餐，不会在应用内付款。请与店主确认订单并直接付款。', back: '返回店铺菜单', confirm: '确认', ready: '向店主出示', markets: '市场地图', searchMarkets: '搜索市场', searchMenu: '搜索菜品', directions: '导航', visit: '查看店铺', all: '全部' },
+}
