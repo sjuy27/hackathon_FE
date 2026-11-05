@@ -89,5 +89,3 @@ export default function FeedPage() {
   const items = q.data?.pages.flatMap(p => p.items) || []
   return <div className="shorts-page"><div className="shorts-topbar"><span className="for-you">{t.forYou}</span><Link to="/markets">{designCopy[lang].near}</Link><LanguageSelect/></div>{!q.data ? <State query={q}/> : <div className="shorts-scroller" aria-label={t.feed}>{items.map(item => <Clip key={item.video_id} item={item}/>)}{!items.length && <Empty/>}{hasNextPage && <div ref={more} className="feed-more"><button disabled={isFetchingNextPage} onClick={() => fetchNextPage()}>{isFetchingNextPage ? t.loading : isFetchNextPageError ? t.retry : t.more}</button></div>}</div>}</div>
 }
-
-

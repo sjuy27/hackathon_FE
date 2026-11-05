@@ -1,20 +1,19 @@
-﻿import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
-import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-query'
-import { api, mediaUrl } from './api'
-import { Empty, ErrorMessage, Money, State, VideoPlayer } from './shared'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { mediaUrl } from './api'
+import { Empty, Money, State, VideoPlayer } from './shared'
 import { Language, LanguageSettings, SubtitleSettings, text, useApi } from './data'
 import { Merchant } from './Merchant'
 import { Login, MerchantLogin } from './Login'
 import { readRole } from './auth'
 import MarketMap from './MarketMap'
-import Dialog from './Dialog'
 import FeedPage from './pages/FeedPage'
 import Profile, { LanguageSelect, NavIcon } from './Profile'
 import PagePosition from './PagePosition'
 import { copy } from './locale'
 import ContentsFeedPage from './pages/ContentsFeedPage'
-import { rememberShop } from './local-history'
+import StoreMenuPage from './pages/StoreMenuPage'
 
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30000 } } })
 function StoreCard({ store, index = 0 }) {
@@ -36,16 +35,6 @@ function VideoPage() {
   const u = copy[useContext(Language)]
   const { id } = useParams(), q = useApi(`/videos/${id}`)
   return <State query={q}>{q.data && <div className="narrow"><VideoPlayer video={q.data} /><h1>{q.data.menu?.name || u.feed}</h1><Link className="button" to={`/stores/${q.data.store_id}`}>{u.visit} ↗</Link></div>}</State>
-}
-function Store() {
-  const u = copy[useContext(Language)]
-  const { id } = useParams(), lang = useContext(Language), t = text[lang], q = useApi(`/stores/${id}`)
-  useEffect(() => { if (q.data) rememberShop(q.data.store_id) }, [q.data])
-  const [cart, setCart] = useState({}), [order, setOrder] = useState(null)
-  const preview = useMutation({ mutationFn: () => api('/orders/preview', { method: 'POST', body: { store_id: Number(id), lang, items: Object.entries(cart).filter(([, qty]) => qty > 0).map(([menu_id, qty]) => ({ menu_id: Number(menu_id), qty })) } }), onSuccess: setOrder })
-  const count = Object.values(cart).reduce((a, b) => a + b, 0)
-  function change(menuId, delta) { setCart(c => ({ ...c, [menuId]: Math.max(0, Math.min(50, (c[menuId] || 0) + delta)) })); setOrder(null) }
-  return <State query={q}>{q.data && <><div className="store-heading"><div><span className="eyebrow">{q.data.market.name}</span><h1>{q.data.name}</h1><p>{q.data.address}</p><p>{q.data.hours}</p><div className="tags">{q.data.payment.map(p => <span key={p}>{p}</span>)}</div></div><a className="button outline" href={mediaUrl(q.data.directions_url)} target="_blank" rel="noreferrer">⌖ {t[12]} ↗</a></div><div className="store-layout"><div><section className="story"><span className="eyebrow">FROM THE MERCHANT</span><h2>{u.story}</h2><p>{q.data.story || q.data.story_ko}</p></section>{q.data.videos.map(v => <div className="store-video" key={v.video_id}><VideoPlayer video={v} /></div>)}</div><section className="menu-panel" id="menu"><h2>{t[9]} <span className="small">{q.data.menus.length}</span></h2>{q.data.menus.map(m => <article className="menu-row" key={m.menu_id}><div><h3>{m.name}</h3>{lang !== 'ko' && <p>{m.name_ko}</p>}<p>{m.description}</p>{m.how_to_eat && <details><summary>{u.how}</summary><p>{m.how_to_eat}</p></details>}<div className="tags"><span className="spicy" aria-label={`spicy ${m.spicy_level}/3`}>{m.spicy_level ? '●'.repeat(m.spicy_level) + '○'.repeat(3 - m.spicy_level) : u.mild}</span>{m.is_ai_guess && <span>{u.ai}</span>}</div><strong><Money value={m.price} /></strong></div><div className="stepper"><button aria-label={`${m.name} -1`} disabled={!cart[m.menu_id]} onClick={() => change(m.menu_id, -1)}>−</button><output>{cart[m.menu_id] || 0}</output><button aria-label={`${m.name} +1`} disabled={cart[m.menu_id] >= 50} onClick={() => change(m.menu_id, 1)}>+</button></div></article>)}{!q.data.menus.length && <Empty />}<ErrorMessage error={preview.error} /><button className="button full" disabled={!count || preview.isPending} onClick={() => preview.mutate()}>{preview.isPending ? u.loading : `${t[10]} · ${count}`} →</button><p className="small">{u.orderNote}</p></section></div>{order && <Dialog label={t[11]} onClose={() => setOrder(null)}><button className="close" onClick={() => setOrder(null)} autoFocus aria-label={u.close}>×</button><span className="eyebrow">ORDER CARD</span><p>{t[11]}</p><h2>{order.ko_message}</h2>{order.ko_lines.map((line, i) => <div className="order-line" key={i}><strong>{line}</strong><p>{order.translated_lines[i]}</p></div>)}<div className="total">{u.total}<strong><Money value={order.total_price} /></strong></div><button className="button full" onClick={() => setOrder(null)}>{u.ok}</button></Dialog>}</>}</State>
 }
 function Content() {
   const u = copy[useContext(Language)]
@@ -74,7 +63,8 @@ function Shell() {
   const isLogin = ['/login', '/merchant/login'].includes(location.pathname)
   const viewLang = isMerchant ? 'ko' : lang, t = copy[viewLang]
   const customHeader = ['/contents', '/profile'].includes(location.pathname) || isLogin
-  const designRoute = location.pathname === '/contents'
+  const storeRoute = /^\/stores\/[^/]+(?:\/order)?$/.test(location.pathname)
+  const designRoute = location.pathname === '/contents' || storeRoute
   const isFeed = location.pathname === '/' || location.pathname === '/shorts'
   function changeLanguage(next) {
     if (!['en', 'ko', 'zh'].includes(next)) return
@@ -83,17 +73,17 @@ function Shell() {
   }
   return <Language.Provider value={viewLang}><LanguageSettings.Provider value={changeLanguage}>
     <SubtitleSettings.Provider value={{ lang: isMerchant ? 'ko' : subtitleChoice === 'auto' ? lang : subtitleChoice, choice: subtitleChoice, setChoice: changeSubtitles }}><PagePosition/>
-    {!isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools">{isMerchant ? <span className="merchant-badge">사장님 모드</span> : <LanguageSelect/>}</div></header>}
+    {!designRoute && !isFeed && !customHeader && <header><Link className="brand" to="/"><span className="brand-icon">◒</span> 골목</Link><div className="header-tools">{isMerchant ? <span className="merchant-badge">사장님 모드</span> : <LanguageSelect/>}</div></header>}
     <main className={designRoute ? 'design-route' : isFeed ? 'feed-main' : isLogin ? 'login-main' : customHeader ? 'designed-main' : ''} key={location.pathname + lang}><Routes>
       <Route path="/" element={readRole() ? <FeedPage/> : <Navigate to="/login" replace/>}/><Route path="/shorts" element={<FeedPage/>}/>
       <Route path="/markets" element={<Explore/>}/><Route path="/markets/:id" element={<Market/>}/>
-      <Route path="/stores/:id" element={<Store/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
+      <Route path="/stores/:id" element={<StoreMenuPage/>}/><Route path="/videos/:id" element={<VideoPage/>}/>
       <Route path="/contents" element={<ContentsFeedPage/>}/><Route path="/contents/:id" element={<Content/>}/>
       <Route path="/profile" element={<Profile/>}/><Route path="/login" element={<Login/>}/><Route path="/merchant/login" element={<MerchantLogin/>}/><Route path="/merchant/*" element={<Merchant/>}/>
       <Route path="*" element={<div className="state"><h1>{t.notFound}</h1><Link to="/">{t.home}</Link></div>}/>
     </Routes></main>
-    {!isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
-    {isLogin ? null : isMerchant ? <nav className="mobile-nav" aria-label="사장님 메뉴">
+    {!designRoute && !isFeed && !customHeader && <footer><Link className="brand" to="/">◒ 골목</Link><p>{t.footer}</p><span>© 2026 GOLMOK</span></footer>}
+    {isLogin || storeRoute ? null : isMerchant ? <nav className="mobile-nav" aria-label="사장님 메뉴">
       <NavLink to="/merchant/register"><NavIcon type="mic"/><span>가게 등록</span></NavLink>
       <NavLink to="/merchant/video"><NavIcon type="video"/><span>영상 만들기</span></NavLink>
       <NavLink to="/merchant/edit"><NavIcon type="edit"/><span>정보 수정</span></NavLink>

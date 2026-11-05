@@ -50,7 +50,7 @@ main.design-route { padding: 0; margin: 0; min-height: 100dvh; }
 .mobile-page h1, .mobile-page h2, .mobile-page h3, .figma-food-sheet h2, .figma-food-sheet h3 { letter-spacing: normal; line-height: var(--leading-tight); font-weight: var(--weight-bold); }
 .mobile-page p { line-height: var(--leading-body); }
 .mobile-heading { display: flex; align-items: center; gap: var(--mobile-gap); min-height: var(--mobile-header-height); }
-.mobile-heading h1 { flex: 1; min-width: 0; font-size: var(--text-title); margin: 0; }
+.mobile-heading h1 { flex: 1; min-width: 0; font-size: var(--text-title); margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .mobile-heading .back-control { display: grid; place-items: center; width: calc(var(--spacing-unit) * 6); min-height: calc(var(--spacing-unit) * 11); font-size: var(--text-title); }
 .mobile-page select.language-pill { width: calc(var(--spacing-unit) * 12); height: calc(var(--spacing-unit) * 11); border-color: var(--color-line); color: var(--color-muted); font-size: var(--text-caption); font-weight: var(--weight-normal); }
 .mobile-subheading { margin: 0 0 calc(var(--spacing-unit) * 5); font-size: var(--text-caption); color: var(--color-muted); }
@@ -120,3 +120,33 @@ main.feed-main { height: calc(100dvh - var(--mobile-nav-height) - env(safe-area-
 .mobile-nav { height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); width: min(100%,var(--app-width)); }
 .mobile-nav a.active { color: var(--color-clay); }
 @media (max-height: 620px) { :root { --feed-card-height: 136px; } .short-caption p { -webkit-line-clamp: 1; } }
+
+/* feed.png: compact shop menu and fixed order summary. */
+:root { --selection-bar-height: 112px; }
+.store-menu-page { padding-bottom: calc(var(--selection-bar-height) + var(--mobile-inset) + env(safe-area-inset-bottom)); }
+.store-menu-page .mobile-heading h1 { font-size: var(--text-heading); }
+.store-location { display: flex; align-items: center; gap: var(--spacing-unit); color: var(--color-muted); font-size: var(--text-micro); margin: 0 0 calc(var(--spacing-unit) * 5); }
+.store-location svg { width: calc(var(--spacing-unit) * 3); height: calc(var(--spacing-unit) * 3); flex-shrink: 0; }
+.store-menu-page section { margin: 0; }
+.store-menu-page h2 { font-size: var(--text-body); margin: var(--mobile-inset) 0; }
+.menu-selection-list { display: grid; grid-template-columns: minmax(0,1fr); gap: var(--mobile-gap); }
+.menu-select-card { display: flex; align-items: center; gap: var(--mobile-gap); padding: var(--mobile-gap); min-height: calc(var(--spacing-unit) * 24); border: 1px solid var(--color-line); border-radius: var(--radius-card); background: var(--color-field); cursor: pointer; }
+.menu-select-card.selected { border-color: var(--color-clay); background: var(--color-selected); }
+.menu-select-details { min-width: 0; flex: 1; }
+.menu-select-details strong, .menu-select-details small, .menu-select-details b { display: block; line-height: var(--leading-body); }
+.menu-select-details strong { font-size: var(--text-body); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.menu-select-details small { color: var(--color-muted); font-size: var(--text-micro); margin: var(--spacing-unit) 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menu-select-details b { font-size: var(--text-caption); }
+.menu-select-card input { flex-shrink: 0; accent-color: var(--color-clay); width: calc(var(--spacing-unit) * 4); height: calc(var(--spacing-unit) * 4); }
+.store-market-map { margin-top: calc(var(--spacing-unit) * 7) !important; }
+.store-market-map > div { display: flex; align-items: flex-start; gap: calc(var(--spacing-unit) * 2); }
+.store-market-map svg { width: calc(var(--spacing-unit) * 4); height: calc(var(--spacing-unit) * 4); color: var(--color-muted); flex-shrink: 0; }
+.store-market-map p { flex: 1; margin: 0; font-size: var(--text-caption); }
+.store-market-map small { display: block; margin-top: var(--spacing-unit); font-size: var(--text-micro); color: var(--color-muted); }
+.store-market-map a { font-size: var(--text-micro); color: var(--color-clay); white-space: nowrap; }
+.selection-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%,var(--app-width)); padding: var(--mobile-gap) var(--mobile-inset) calc(var(--mobile-inset) + env(safe-area-inset-bottom)); background: var(--color-paper); z-index: 30; border-top: 1px solid var(--color-line); font-family: var(--font-mobile); }
+.selection-total { display: flex; align-items: center; justify-content: space-between; gap: var(--mobile-gap); margin-bottom: var(--mobile-gap); }
+.selection-total > span { color: var(--color-muted); font-size: var(--text-micro); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selection-total strong { font-size: var(--text-heading); white-space: nowrap; }
+.selection-actions { display: flex; gap: calc(var(--spacing-unit) * 2); }
+.selection-actions > * { flex: 1; }
