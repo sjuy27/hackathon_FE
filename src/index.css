@@ -235,3 +235,63 @@ footer > span { width: 100%; margin: 0; color: #999; }
 }
 /* Let very narrow desktop viewports account for their native scrollbar. */
 body { min-width: 0; }
+
+/* Reference 3.png: full-height video, compact white shop card and outline tabs. */
+:root { --primary: #a65c52; --primary-hover: #8e4c43; }
+.mobile-nav { height: calc(62px + env(safe-area-inset-bottom)); }
+.mobile-nav a { gap: 3px; font-weight: 400; }
+.mobile-nav span { font-size: 10px; margin-top: 1px; }
+.mobile-nav svg { width: 22px; height: 22px; }
+main.feed-main { padding: 0; min-height: 0; height: calc(100dvh - 62px - env(safe-area-inset-bottom)); }
+.shorts-page { position: relative; height: 100%; background: #777; color: white; }
+.shorts-topbar { position: absolute; z-index: 5; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 20px; height: 64px; padding: 12px 16px; background: linear-gradient(#0006,transparent); font-size: 13px; }
+.for-you { font-weight: 750; border-bottom: 2px solid white; padding: 8px 0; }
+.shorts-topbar > a { color: #fff; font-size: 12px; text-shadow: 0 1px 3px #0008; }
+.shorts-topbar select { margin-left: auto; max-width: 93px; min-width: 0; border: 1px solid #ffffff80; color: white; background: #0002; border-radius: 20px; padding: 7px 9px; font-size: 11px; }
+.shorts-topbar option { color: #222; background: white; }
+.shorts-scroller { height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior-y: contain; scrollbar-width: none; }
+.shorts-scroller::-webkit-scrollbar { display: none; }
+.short-slide { position: relative; height: 100%; min-height: 430px; scroll-snap-align: start; scroll-snap-stop: always; overflow: hidden; background: #696969; }
+.short-slide .short-video { width: 100%; height: 100%; max-height: none; object-fit: cover; border-radius: 0; background: #696969; }
+.short-video::cue { background: #0008; font-size: 14px; }
+.short-shade { position: absolute; inset: 0; background: linear-gradient(transparent 35%,#0002 55%,#0009); pointer-events: none; }
+.short-play { position: absolute; z-index: 2; top: 37%; left: 50%; transform: translate(-50%,-50%); border: 0; border-radius: 50%; width: 52px; height: 52px; min-height: 0; padding: 0; background: #0005; color: white; font-size: 22px; opacity: 0; }
+.short-slide:hover .short-play, .short-play:focus-visible, .short-play.is-paused { opacity: 1; }
+.short-play:hover { background: #0007; }
+.short-tools { position: absolute; right: 15px; bottom: 225px; display: flex; flex-direction: column; gap: 17px; }
+.short-tools button, .short-tools a { width: 40px; height: 40px; display: grid; place-items: center; color: white; background: #0002; border: 0; border-radius: 50%; padding: 0; }
+.short-caption { position: absolute; left: 16px; right: 65px; bottom: 169px; text-shadow: 0 1px 4px #0008; }
+.short-caption h2 { font-size: 14px; font-weight: 700; letter-spacing: 0; margin-bottom: 7px; }
+.short-caption p { color: #fff; font-size: 11px; line-height: 1.5; margin: 0; }
+.short-shop { position: absolute; bottom: 16px; left: 16px; right: 16px; padding: 14px; background: white; color: #202020; border-radius: 15px; box-shadow: 0 2px 10px #00000012; }
+.short-shop-info { display: flex; gap: 11px; align-items: center; min-width: 0; }
+.short-shop-info > div:last-child { min-width: 0; flex: 1; }
+.shop-thumbnail { width: 48px; height: 51px; flex-shrink: 0; border-radius: 7px; background: #ededed; display: grid; place-items: center; color: #888; overflow: hidden; }
+.shop-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+.short-shop h3 { font-size: 13px; margin: 0 0 3px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.short-shop p { font-size: 11px; margin: 0; color: #333; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.short-shop-info span { font-size: 10px; display: block; color: #777; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.short-shop-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 11px; }
+.short-shop-actions a { display: grid; place-items: center; border-radius: 6px; border: 1px solid var(--primary); min-height: 40px; padding: 7px 4px; font-size: 12px; font-weight: 700; text-align: center; }
+.shop-visit { color: var(--primary); }
+.shop-order { color: white; background: var(--primary); }
+.short-video-error { position: absolute; top: 35%; left: 20px; right: 20px; color: white; text-align: center; }
+.shorts-page > .state { margin: 0; padding-top: 130px; border: 0; color: white; }
+.shorts-page .state p { color: white; }
+.feed-more { scroll-snap-align: end; padding: 30px 16px; text-align: center; }
+.profile-page { padding: 12px 0; }
+.profile-avatar { width: 64px; height: 64px; display: grid; place-items: center; border: 1px solid #e8dddb; border-radius: 50%; background: #faf5f3; color: var(--primary); margin: 0 0 18px; }
+.profile-avatar svg { width: 32px; height: 32px; }
+.profile-page h1 { font-size: 26px; }
+.profile-settings { border: 1px solid #e3e3e3; padding: 20px 16px; border-radius: 14px; margin-top: 26px; }
+.profile-settings h2 { font-size: 19px; margin-bottom: 8px; }
+.profile-settings p { font-size: 13px; margin-bottom: 18px; }
+.language-option { width: 100%; display: flex; align-items: center; gap: 12px; margin-top: 9px; padding: 13px 12px; background: #fff; border: 1px solid #ddd; border-radius: 9px; text-align: left; font-size: 14px; }
+.language-option.selected { border-color: var(--primary); background: #fbf5f3; }
+.language-badge { display: grid; place-items: center; width: 30px; height: 28px; background: #f2f2f2; color: #666; font-size: 10px; border-radius: 5px; }
+.language-check { margin-left: auto; color: var(--primary); font-weight: 700; }
+.merchant-entry { display: flex; flex-direction: column; gap: 7px; margin-top: 20px; padding: 20px 16px; border: 1px solid #e3e3e3; border-radius: 14px; }
+.merchant-entry strong { font-size: 15px; }
+.merchant-entry span { font-size: 12px; line-height: 1.6; color: #666; }
+#menu { scroll-margin-top: 16px; }
+@media (prefers-reduced-motion: reduce) { .shorts-scroller { scroll-behavior: auto; } }
